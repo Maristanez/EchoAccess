@@ -41,7 +41,7 @@ app = FastAPI(title="EchoAccess API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -134,7 +134,14 @@ async def parse_form(req: ParseFormRequest, token_payload: dict = Depends(verify
         raise HTTPException(
             status_code=404, detail=f"Form '{req.form_name}' not found"
         )
-    fields = await parse_form_html(raw_html)
+    try:
+        fields = await parse_form_html(raw_html)
+    except Exception as e:
+        print(f"[parse-form] Gemini error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {e}",
+        )
     return {"fields": fields}
 
 

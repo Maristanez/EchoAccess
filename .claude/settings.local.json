@@ -3,7 +3,11 @@
     "allow": [
       "Bash(pip show:*)",
       "Bash(pip install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(uvicorn main:app:*)",
+      "Bash(ls:*)"
     ]
   }
 }
