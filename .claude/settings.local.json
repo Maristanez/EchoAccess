@@ -19,7 +19,11 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST http://localhost:8000/api/tts -H \"Content-Type: application/json\" -d '{\"text\":\"Hello, welcome to EchoAccess!\"}')",
       "Bash(curl -s -X POST http://localhost:8000/api/tts -H \"Content-Type: application/json\" -d '{\"text\":\"Hello\"}')",
       "Bash(git add backend/main.py backend/requirements.txt frontend/src/hooks/useVoice.ts && git commit -m \"$\\(cat <<'EOF'\nfeat: integrate ElevenLabs TTS for natural-sounding voice\n\n- Add /api/tts backend endpoint that proxies text to ElevenLabs API\n  and returns audio/mpeg using the eleven_flash_v2_5 model\n- Update useVoice speak\\(\\) to fetch audio from backend and play via\n  Audio element, with automatic browser speechSynthesis fallback\n- Update cancelSpeech to stop ElevenLabs audio playback\n- Add httpx dependency for async HTTP calls to ElevenLabs\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(pkill -f \"uvicorn main:app\" 2>/dev/null; pkill -f \"vite\" 2>/dev/null; sleep 2; echo \"cleared\")"
+      "Bash(pkill -f \"uvicorn main:app\" 2>/dev/null; pkill -f \"vite\" 2>/dev/null; sleep 2; echo \"cleared\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(uvicorn main:app:*)",
+      "Bash(ls:*)"
     ]
   }
 }

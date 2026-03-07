@@ -7,7 +7,7 @@ import { useVoice } from "@/hooks/useVoice"
 import { ChatPanel } from "@/components/ChatPanel"
 import { FormPreview } from "@/components/FormPreview"
 import { FormSelector } from "@/components/FormSelector"
-import { WelcomeBanner } from "@/components/WelcomeBanner"
+import { StartPage } from "@/components/StartPage"
 import { ProgressBar } from "@/components/ProgressBar"
 import { Confetti } from "@/components/magicui/confetti"
 import { Button } from "@/components/ui/button"
@@ -217,9 +217,13 @@ function AppContent() {
       {/* Main Content */}
       <main className="flex-1 flex overflow-hidden">
         {echo.flow === "IDLE" ? (
-          <div className="flex-1 flex items-center justify-center">
-            <WelcomeBanner />
-          </div>
+          <StartPage
+            forms={echo.forms}
+            onSelectForm={handleFormSelect}
+            isListening={voice.isListening}
+            isSpeaking={voice.isSpeaking}
+            voiceSupported={voice.supported}
+          />
         ) : (
           <>
             {/* Chat Panel */}

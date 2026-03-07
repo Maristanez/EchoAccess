@@ -44,7 +44,7 @@ app = FastAPI(title="EchoAccess API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,7 +141,14 @@ async def parse_form(req: ParseFormRequest, token_payload: dict = Depends(verify
         raise HTTPException(
             status_code=404, detail=f"Form '{req.form_name}' not found"
         )
-    fields = await parse_form_html(raw_html)
+    try:
+        fields = await parse_form_html(raw_html)
+    except Exception as e:
+        print(f"[parse-form] Gemini error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {e}",
+        )
     return {"fields": fields}
 
 
@@ -179,12 +186,19 @@ async def chat(req: ChatRequest, token_payload: dict = Depends(verify_token)):
         except Exception:
             memory_context = ""
 
-    result = await generate_question(
-        form_name=req.form_name,
-        next_field=next_field,
-        answered=req.answered,
-        profile={"memory_context": memory_context},
-    )
+    try:
+        result = await generate_question(
+            form_name=req.form_name,
+            next_field=next_field,
+            answered=req.answered,
+            profile={"memory_context": memory_context},
+        )
+    except Exception as e:
+        print(f"[chat] Gemini error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {e}",
+        )
     return result
 
 
@@ -219,7 +233,14 @@ async def user_profile(thread_id: str | None = None, token_payload: dict = Depen
 
 @app.post("/api/submit-form")
 async def submit_form(req: SubmitFormRequest, token_payload: dict = Depends(verify_token)):
-    summary = await generate_summary(req.form_name, req.answers)
+    try:
+        summary = await generate_summary(req.form_name, req.answers)
+    except Exception as e:
+        print(f"[submit-form] Gemini error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {e}",
+        )
     if req.thread_id:
         try:
             await store_context(
