@@ -55,9 +55,19 @@ export function useEchoAccess() {
   )
 
   const loadForms = useCallback(async () => {
-    const res = await fetchWithAuth(`${API_BASE}/forms`)
-    const data = await res.json()
-    setForms(data.forms)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/forms`)
+      if (!res.ok) {
+        console.error("[loadForms] API error:", res.status, res.statusText)
+        return
+      }
+      const data = await res.json()
+      const list = Array.isArray(data.forms) ? data.forms : []
+      console.log("[loadForms] forms received:", list)
+      setForms(list)
+    } catch (err) {
+      console.error("[loadForms] fetch failed:", err)
+    }
   }, [])
 
   const initSession = useCallback(async () => {

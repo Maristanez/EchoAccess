@@ -23,8 +23,8 @@ export function ChatMessage({ role, content, index }: ChatMessageProps) {
             className={cn(
               "text-xs font-semibold",
               role === "user"
-                ? "bg-blue-600 text-white"
-                : "bg-emerald-600 text-white"
+                ? "bg-brand-primary text-white dark:text-black"
+                : "bg-surface-section text-text-primary/70 border border-surface-border"
             )}
           >
             {role === "user" ? "U" : "EA"}
@@ -34,8 +34,8 @@ export function ChatMessage({ role, content, index }: ChatMessageProps) {
           className={cn(
             "max-w-[80%] shadow-sm",
             role === "user"
-              ? "bg-blue-600 text-white border-blue-700"
-              : "bg-card text-card-foreground"
+              ? "bg-brand-primary text-white dark:text-black border-brand-primary/70 rounded-2xl"
+              : "bg-surface-card text-text-primary border-surface-border rounded-2xl"
           )}
         >
           <CardContent className="p-3 text-sm leading-relaxed">

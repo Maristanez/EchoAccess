@@ -69,10 +69,10 @@ export function ChatPanel({
           ))}
           {isLoading && (
             <div className="flex gap-3 items-start">
-              <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-xs text-white font-semibold shrink-0">
+              <div className="h-8 w-8 rounded-full bg-brand-primary flex items-center justify-center text-xs text-white dark:text-black font-semibold shrink-0">
                 EA
               </div>
-              <div className="bg-card border rounded-lg p-3 text-sm text-muted-foreground">
+              <div className="bg-surface-card border border-surface-border rounded-2xl p-3 text-sm text-text-primary/50">
                 <span className="inline-flex gap-1 items-center">
                   <span className="animate-bounce" style={{ animationDelay: "0ms" }}>.</span>
                   <span className="animate-bounce" style={{ animationDelay: "150ms" }}>.</span>
@@ -89,15 +89,15 @@ export function ChatPanel({
             </div>
           )}
           {isSpeaking && !isLoading && (
-            <div className="flex items-center gap-2 text-blue-400 text-xs" role="status" aria-live="polite">
-              <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+            <div className="flex items-center gap-2 text-brand-primary/70 text-xs" role="status" aria-live="polite">
+              <div className="h-2 w-2 rounded-full bg-brand-primary animate-pulse" />
               Speaking...
             </div>
           )}
         </div>
       </ScrollArea>
 
-      <div className="border-t p-4">
+      <div className="border-t border-surface-border p-4">
         <div className="flex gap-2 items-center">
           <Input
             ref={inputRef}
@@ -118,13 +118,14 @@ export function ChatPanel({
             }
             disabled={disabled || isLoading}
             aria-label="Type your answer"
-            className="flex-1"
+            className="flex-1 bg-surface-card border-surface-border text-text-primary placeholder:text-text-primary/30 rounded-xl"
           />
           <Button
             onClick={handleSend}
             disabled={!input.trim() || disabled || isLoading}
             size="icon"
             aria-label="Send message"
+            className="bg-brand-primary text-white dark:text-black rounded-xl"
           >
             <Send className="h-4 w-4" />
           </Button>
@@ -136,7 +137,7 @@ export function ChatPanel({
             />
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-text-primary/40 mt-2">
           Press Enter to send · Click the mic to speak
         </p>
       </div>

@@ -16,7 +16,7 @@ export function ProgressBar({ current, total, percent }: ProgressBarProps) {
         className="w-32"
         aria-label={`Form progress: ${current} of ${total} fields completed`}
       />
-      <span className="text-xs text-muted-foreground">
+      <span className="text-xs text-text-primary/50">
         {current}/{total}
       </span>
     </div>

@@ -110,10 +110,10 @@ function AppContent() {
   const showFormPreview = isFormActive || echo.flow === "SUBMITTED"
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-surface-page text-text-primary">
       {/* Top Bar */}
-      <header className="border-b px-4 py-3 flex items-center gap-4 shrink-0">
-        <h1 className="text-xl font-bold tracking-tight">
+      <header className="border-b border-surface-border bg-surface-nav backdrop-blur-md px-4 py-3 flex items-center gap-4 shrink-0">
+        <h1 className="font-display text-xl font-bold tracking-tight">
           <span className="text-brand-primary">Echo</span>
           <span className="text-text-primary">Access</span>
         </h1>
@@ -141,12 +141,13 @@ function AppContent() {
             size="sm"
             onClick={echo.reset}
             aria-label="Start over"
+            className="text-text-primary/60 hover:text-text-primary hover:bg-surface-card rounded-full"
           >
             <RotateCcw className="h-4 w-4 mr-1" />
             Start Over
           </Button>
         )}
-        <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
+        <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-text-primary/60 hover:text-text-primary hover:bg-surface-card rounded-full">
           <LogOut className="h-4 w-4 mr-1" />
           Sign Out
         </Button>
@@ -194,9 +195,9 @@ function AppContent() {
 
       {/* Success state */}
       {echo.flow === "SUBMITTED" && (
-        <Alert className="m-4 border-emerald-500/50 bg-emerald-500/10">
-          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          <AlertDescription className="text-emerald-400">
+        <Alert className="m-4 border-brand-primary/30 bg-brand-primary/10">
+          <CheckCircle2 className="h-4 w-4 text-brand-primary" />
+          <AlertDescription className="text-brand-primary">
             Form submitted successfully! You can select another form or start
             over.
           </AlertDescription>
@@ -223,10 +224,10 @@ function AppContent() {
               {echo.answers.map((answer, i) => (
                 <div
                   key={answer.field_id}
-                  className="flex items-center gap-3 rounded-lg border p-3"
+                  className="flex items-center gap-3 rounded-xl border border-surface-border bg-surface-card p-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-text-primary/50">
                       {answer.label}
                     </p>
                     <p className="text-sm font-medium truncate">
@@ -255,7 +256,7 @@ function AppContent() {
             </div>
           </ScrollArea>
           {echo.summary && (
-            <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
+            <p className="text-sm text-text-primary/50 mt-2 border-t border-surface-border pt-2">
               {echo.summary}
             </p>
           )}
@@ -264,6 +265,7 @@ function AppContent() {
               Start Over
             </Button>
             <Button
+              className="bg-brand-primary text-white dark:text-black"
               onClick={() => {
                 echo.confirmSubmit()
                 voice.speak(
@@ -279,7 +281,7 @@ function AppContent() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="border-t px-4 py-2 text-xs text-muted-foreground text-center shrink-0">
+      <footer className="border-t border-surface-border px-4 py-2 text-xs text-text-primary/30 text-center shrink-0">
         Tab to navigate · Enter to confirm · Esc to go back · Powered by Gemini
         + Backboard.io
       </footer>

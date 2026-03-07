@@ -11,12 +11,12 @@ interface VoiceButtonProps {
 export function VoiceButton({ isListening, onToggle, disabled }: VoiceButtonProps) {
   return (
     <PulsatingButton
-      pulseColor={isListening ? "#ef4444" : "#6b7280"}
+      pulseColor={isListening ? "#ef4444" : "#059669"}
       onClick={onToggle}
       disabled={disabled}
       className={cn(
         "rounded-full p-4 transition-colors cursor-pointer",
-        isListening ? "bg-red-600 text-white" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700",
+        isListening ? "bg-red-600 text-white" : "bg-surface-card text-text-primary/60 hover:bg-surface-section border border-surface-border",
         disabled && "opacity-50 cursor-not-allowed"
       )}
       aria-label={isListening ? "Stop listening" : "Start listening"}

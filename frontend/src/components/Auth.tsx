@@ -7,14 +7,14 @@ export function Auth() {
     const { theme } = useTheme()
 
     return (
-        <div className="flex h-screen w-screen items-center justify-center bg-background">
-            <div className="w-full max-w-md p-8 bg-card rounded-xl border shadow-sm">
+        <div className="flex h-screen w-screen items-center justify-center bg-surface-page">
+            <div className="w-full max-w-md p-8 bg-surface-card rounded-2xl border border-surface-border shadow-xl">
                 <div className="mb-6 text-center">
                     <h1 className="font-display text-2xl font-bold tracking-tight mb-2">
                         <span className="text-brand-primary">Echo</span>
                         <span className="text-text-primary">Access</span>
                     </h1>
-                    <p className="text-muted-foreground text-sm">Sign in to your account</p>
+                    <p className="text-text-primary/50 text-sm">Sign in to your account</p>
                 </div>
                 <SupabaseAuth
                     supabaseClient={supabase}
