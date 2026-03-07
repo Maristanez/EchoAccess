@@ -5,6 +5,9 @@ import json
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 MODEL = "gemini-2.5-flash"
+NO_THINK = types.GenerateContentConfig(
+    thinking_config=types.ThinkingConfig(thinking_budget=0)
+)
 
 
 def _strip_fences(text: str) -> str:
@@ -25,7 +28,7 @@ HTML:
 {raw_html}
 Return ONLY valid JSON array. No explanation. No markdown."""
 
-    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt, config=NO_THINK)
     return json.loads(_strip_fences(response.text))
 
 
@@ -41,7 +44,7 @@ Profile: {json.dumps(profile)}
 Ask one short friendly question for this field (1-2 sentences max). If it has options, list them. If profile has a match, suggest it.
 Return ONLY JSON: {{ "question": "..." }}"""
 
-    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt, config=NO_THINK)
     return json.loads(_strip_fences(response.text))
 
 
@@ -53,7 +56,7 @@ Group related fields (address together, personal info together).
 Use natural speech. End with: "Would you like me to submit this, or is there anything you'd like to change?"
 Return plain text only."""
 
-    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt, config=NO_THINK)
     return response.text
 
 
@@ -64,5 +67,5 @@ Rewrite each error in plain friendly language for a blind user hearing it via te
 No jargon. No "field is invalid." Say exactly what needs fixing and how.
 Return a simple numbered list."""
 
-    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt, config=NO_THINK)
     return response.text
