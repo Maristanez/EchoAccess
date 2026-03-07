@@ -179,12 +179,19 @@ async def chat(req: ChatRequest, token_payload: dict = Depends(verify_token)):
         except Exception:
             memory_context = ""
 
-    result = await generate_question(
-        form_name=req.form_name,
-        next_field=next_field,
-        answered=req.answered,
-        profile={"memory_context": memory_context},
-    )
+    try:
+        result = await generate_question(
+            form_name=req.form_name,
+            next_field=next_field,
+            answered=req.answered,
+            profile={"memory_context": memory_context},
+        )
+    except Exception as e:
+        print(f"[chat] Gemini error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {e}",
+        )
     return result
 
 
@@ -219,7 +226,14 @@ async def user_profile(thread_id: str | None = None, token_payload: dict = Depen
 
 @app.post("/api/submit-form")
 async def submit_form(req: SubmitFormRequest, token_payload: dict = Depends(verify_token)):
-    summary = await generate_summary(req.form_name, req.answers)
+    try:
+        summary = await generate_summary(req.form_name, req.answers)
+    except Exception as e:
+        print(f"[submit-form] Gemini error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI service temporarily unavailable: {e}",
+        )
     if req.thread_id:
         try:
             await store_context(
