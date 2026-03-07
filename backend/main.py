@@ -24,18 +24,30 @@ from backboard_client import (
     save_profile_field,
     ask_with_context,
 )
+from supabase_client import get_user_session, upsert_user_session
 
-ASSISTANT_ID = None
+# ── Fix 1: Global fallback assistant (persisted across restarts via env var) ──
+FALLBACK_ASSISTANT_ID: str | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global ASSISTANT_ID
-    try:
-        ASSISTANT_ID = await create_echoaccess_assistant()
-    except Exception as e:
-        print(f"Warning: Backboard init failed ({e}). Memory features disabled.")
-        ASSISTANT_ID = None
+    global FALLBACK_ASSISTANT_ID
+    # Use persisted ID if configured (avoids creating a new assistant on every restart)
+    env_id = os.getenv("BACKBOARD_ASSISTANT_ID")
+    if env_id:
+        FALLBACK_ASSISTANT_ID = env_id
+        print(f"[backboard] Reusing assistant {FALLBACK_ASSISTANT_ID}")
+    else:
+        try:
+            FALLBACK_ASSISTANT_ID = await create_echoaccess_assistant()
+            print(
+                f"[backboard] Created new assistant {FALLBACK_ASSISTANT_ID}\n"
+                f"  → Add BACKBOARD_ASSISTANT_ID={FALLBACK_ASSISTANT_ID} to .env to persist across restarts."
+            )
+        except Exception as e:
+            print(f"[backboard] Init failed ({e}). Memory features disabled.")
+            FALLBACK_ASSISTANT_ID = None
     yield
 
 
@@ -51,10 +63,10 @@ app.add_middleware(
 
 PROFILE_FIELD_MAP = {
     "name": "user_name",
-    "first name": "user_name",
-    "last name": "user_name",
-    "full name": "user_name",
-    "email": "user_email",
+    "first name": "first_name",
+    "last name": "last_name",
+    "full name": "full_name",
+    "email": "email",
     "address": "home_address",
     "street": "home_address",
     "phone": "phone_number",
@@ -80,10 +92,6 @@ def detect_profile_field(label: str) -> str | None:
 
 class ParseFormRequest(BaseModel):
     form_name: str
-
-
-class NewSessionRequest(BaseModel):
-    pass
 
 
 class ChatRequest(BaseModel):
@@ -116,13 +124,12 @@ class TTSRequest(BaseModel):
 
 @app.get("/health")
 async def health_public():
-    """Unauthenticated health check for load balancers and readiness probes."""
-    return {"status": "ok", "backboard": ASSISTANT_ID is not None}
+    return {"status": "ok", "backboard": FALLBACK_ASSISTANT_ID is not None}
 
 
 @app.get("/api/health")
 async def health(token_payload: dict = Depends(verify_token)):
-    return {"status": "ok", "backboard": ASSISTANT_ID is not None}
+    return {"status": "ok", "backboard": FALLBACK_ASSISTANT_ID is not None}
 
 
 @app.get("/api/forms")
@@ -159,10 +166,42 @@ async def parse_form(req: ParseFormRequest, token_payload: dict = Depends(verify
 
 @app.post("/api/new-session")
 async def new_session(token_payload: dict = Depends(verify_token)):
-    if ASSISTANT_ID is None:
+    """
+    Fix 2+3: Return a stable thread for this user, isolated per user.
+
+    Flow:
+      1. Try Supabase lookup → return existing thread (per-user assistant).
+      2. If not found → create a new per-user assistant + thread, store in Supabase.
+      3. If Supabase unavailable → fall back to global FALLBACK_ASSISTANT_ID.
+    """
+    user_id: str = token_payload.get("sub", "")
+
+    # ── Supabase path (Fix 2+3) ──
+    if user_id:
+        existing = await get_user_session(user_id)
+        if existing:
+            print(f"[session] Reusing thread {existing['thread_id']} for user {user_id[:8]}…")
+            return {"thread_id": existing["thread_id"]}
+
+        # Create a per-user assistant for memory isolation (Fix 3)
+        try:
+            user_assistant_id = await create_echoaccess_assistant()
+            thread_id = await create_session_thread(user_assistant_id)
+            await upsert_user_session(user_id, user_assistant_id, thread_id)
+            print(f"[session] Created assistant {user_assistant_id} + thread {thread_id} for user {user_id[:8]}…")
+            return {"thread_id": thread_id}
+        except Exception as e:
+            print(f"[session] Per-user assistant creation failed ({e}), falling back to global.")
+
+    # ── Fallback to global assistant (Fix 1) ──
+    if FALLBACK_ASSISTANT_ID is None:
         return {"thread_id": None}
-    thread_id = await create_session_thread(ASSISTANT_ID)
-    return {"thread_id": thread_id}
+    try:
+        thread_id = await create_session_thread(FALLBACK_ASSISTANT_ID)
+        return {"thread_id": thread_id}
+    except Exception as e:
+        print(f"[session] Thread creation failed: {e}")
+        return {"thread_id": None}
 
 
 @app.post("/api/chat")
@@ -178,7 +217,6 @@ async def chat(req: ChatRequest, token_payload: dict = Depends(verify_token)):
             "suggestion": None,
         }
 
-    # Get memory context from Backboard if available
     memory_context = ""
     if req.thread_id:
         try:
@@ -188,7 +226,8 @@ async def chat(req: ChatRequest, token_payload: dict = Depends(verify_token)):
                 "What do you remember about this user that might help pre-fill this field?"
             )
             memory_context = await ask_with_context(req.thread_id, memory_prompt)
-        except Exception:
+        except Exception as e:
+            print(f"[chat] ask_with_context failed: {e}")
             memory_context = ""
 
     try:
@@ -215,10 +254,15 @@ async def save_answer(req: SaveAnswerRequest, token_payload: dict = Depends(veri
                 req.thread_id,
                 f"User answered '{req.field_id}' with value: {req.value}",
             )
-            if req.is_profile_field:
+        except Exception as e:
+            print(f"[save-answer] store_context failed: {e}")
+
+        if req.is_profile_field:
+            try:
                 await save_profile_field(req.thread_id, req.field_id, req.value)
-        except Exception:
-            pass
+            except Exception as e:
+                print(f"[save-answer] save_profile_field failed: {e}")
+
     return {"ok": True}
 
 
@@ -252,8 +296,8 @@ async def submit_form(req: SubmitFormRequest, token_payload: dict = Depends(veri
                 req.thread_id,
                 f"User completed the {req.form_name} form successfully.",
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[submit-form] store_context failed: {e}")
     return {"summary": summary}
 
 
