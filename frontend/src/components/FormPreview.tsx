@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -22,6 +23,14 @@ export function FormPreview({
   completionPercent,
 }: FormPreviewProps) {
   const answeredIds = new Set(answers.map((a) => a.field_id))
+  const activeRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to the active field
+  useEffect(() => {
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+    }
+  }, [currentFieldIndex])
 
   return (
     <Card className="h-full flex flex-col">
@@ -43,6 +52,7 @@ export function FormPreview({
           return (
             <div
               key={field.id}
+              ref={isActive ? activeRef : undefined}
               className={cn(
                 "relative flex items-center gap-3 rounded-lg border p-3 transition-colors",
                 isActive && "border-blue-500 bg-blue-500/10",

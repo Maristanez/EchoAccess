@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { RotateCcw, CheckCircle2 } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { RotateCcw, CheckCircle2, Pencil } from "lucide-react"
 import type { FormInfo } from "@/types"
 
 export default function App() {
@@ -36,7 +37,7 @@ export default function App() {
 
   // When voice transcript changes, submit it as an answer
   useEffect(() => {
-    if (voice.transcript && echo.flow === "FIELD_LOOP") {
+    if (voice.transcript && (echo.flow === "FIELD_LOOP" || echo.flow === "CONFIRMING")) {
       handleUserInput(voice.transcript)
     }
   }, [voice.transcript]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -202,11 +203,54 @@ export default function App() {
         open={echo.flow === "CONFIRMING" && !!echo.summary}
         onOpenChange={() => {}}
       >
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Review Your Answers</DialogTitle>
-            <DialogDescription>{echo.summary}</DialogDescription>
+            <DialogDescription>
+              Please review your answers below. Click the pencil icon to edit any field.
+            </DialogDescription>
           </DialogHeader>
+          <ScrollArea className="max-h-[50vh]">
+            <div className="space-y-2 pr-2">
+              {echo.answers.map((answer, i) => (
+                <div
+                  key={answer.field_id}
+                  className="flex items-center gap-3 rounded-lg border p-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground">
+                      {answer.label}
+                    </p>
+                    <p className="text-sm font-medium truncate">
+                      {answer.value}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 h-8 w-8"
+                    onClick={() => {
+                      echo.goToField(i)
+                      const field = echo.fields[i]
+                      if (field) {
+                        echo.askNextQuestion(undefined, i).then((q) => {
+                          if (q) voice.speak(q)
+                        })
+                      }
+                    }}
+                    aria-label={`Edit ${answer.label}`}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          {echo.summary && (
+            <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
+              {echo.summary}
+            </p>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={echo.reset}>
               Start Over

@@ -64,7 +64,7 @@ export function useEchoAccess() {
       setCurrentFieldIndex(0)
       setSummary("")
 
-      addMessage("assistant", `Reading the ${form.name} form...`)
+      addMessage("assistant", `Great, let's fill out the ${form.name}. Give me a moment to read the form...`)
 
       try {
         const res = await fetch(`${API_BASE}/parse-form`, {
@@ -73,10 +73,15 @@ export function useEchoAccess() {
           body: JSON.stringify({ form_name: form.id }),
         })
         const data = await res.json()
-        setFields(data.fields)
+        const parsedFields = data.fields as FormField[]
+        setFields(parsedFields)
         setFlow("FIELD_LOOP")
         setIsLoading(false)
-        return data.fields as FormField[]
+        addMessage(
+          "assistant",
+          `I found ${parsedFields.length} fields. I'll ask you one at a time — just speak or type your answers.`
+        )
+        return parsedFields
       } catch (err) {
         addMessage(
           "assistant",
@@ -194,6 +199,23 @@ export function useEchoAccess() {
     )
   }, [addMessage])
 
+  const goToField = useCallback(
+    (fieldIndex: number) => {
+      // Remove answers from this field onward
+      const fieldsToKeep = fields.slice(0, fieldIndex)
+      const keptIds = new Set(fieldsToKeep.map((f) => f.id))
+      setAnswers((prev) => prev.filter((a) => keptIds.has(a.field_id)))
+      setCurrentFieldIndex(fieldIndex)
+      setFlow("FIELD_LOOP")
+      setSummary("")
+      addMessage(
+        "assistant",
+        `Let's update the "${fields[fieldIndex].label}" field.`
+      )
+    },
+    [fields, addMessage]
+  )
+
   const reset = useCallback(() => {
     setFlow("IDLE")
     setSelectedForm(null)
@@ -226,6 +248,7 @@ export function useEchoAccess() {
     askNextQuestion,
     submitAnswer,
     confirmSubmit,
+    goToField,
     reset,
     addMessage,
   }

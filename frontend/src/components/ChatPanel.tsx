@@ -73,8 +73,25 @@ export function ChatPanel({
                 EA
               </div>
               <div className="bg-card border rounded-lg p-3 text-sm text-muted-foreground">
-                <span className="animate-pulse">Thinking...</span>
+                <span className="inline-flex gap-1 items-center">
+                  <span className="animate-bounce" style={{ animationDelay: "0ms" }}>.</span>
+                  <span className="animate-bounce" style={{ animationDelay: "150ms" }}>.</span>
+                  <span className="animate-bounce" style={{ animationDelay: "300ms" }}>.</span>
+                  <span className="ml-1">Thinking</span>
+                </span>
               </div>
+            </div>
+          )}
+          {isListening && !isLoading && (
+            <div className="flex items-center gap-2 text-red-400 text-xs animate-pulse" role="status" aria-live="assertive">
+              <div className="h-2 w-2 rounded-full bg-red-500" />
+              Listening — speak now...
+            </div>
+          )}
+          {isSpeaking && !isLoading && (
+            <div className="flex items-center gap-2 text-blue-400 text-xs" role="status" aria-live="polite">
+              <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+              Speaking...
             </div>
           )}
         </div>
@@ -115,7 +132,7 @@ export function ChatPanel({
             <VoiceButton
               isListening={isListening}
               onToggle={onToggleVoice}
-              disabled={disabled || isLoading || isSpeaking}
+              disabled={disabled || isLoading}
             />
           )}
         </div>
