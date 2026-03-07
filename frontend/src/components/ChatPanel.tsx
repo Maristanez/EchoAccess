@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Send } from "lucide-react"
@@ -29,18 +28,12 @@ export function ChatPanel({
   disabled,
 }: ChatPanelProps) {
   const [input, setInput] = useState("")
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    // Auto-scroll to bottom when messages change
-    if (scrollRef.current) {
-      const el = scrollRef.current.querySelector("[data-slot='scroll-area-viewport']")
-      if (el) {
-        el.scrollTop = el.scrollHeight
-      }
-    }
-  }, [messages])
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages, isLoading])
 
   const handleSend = () => {
     const trimmed = input.trim()
@@ -51,8 +44,8 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea ref={scrollRef} className="flex-1 px-4 py-4">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
         <div
           className="space-y-4"
           role="log"
@@ -94,8 +87,9 @@ export function ChatPanel({
               Speaking...
             </div>
           )}
+          <div ref={bottomRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="border-t border-surface-border p-4">
         <div className="flex gap-2 items-center">

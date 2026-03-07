@@ -26,10 +26,30 @@ import { RotateCcw, CheckCircle2, Pencil, LogOut } from "lucide-react"
 import type { FormInfo } from "@/types"
 import { LandingPage } from "@/components/LandingPage"
 
+function matchFormByVoice(transcript: string, forms: FormInfo[]): FormInfo | null {
+  const lower = transcript.toLowerCase()
+  // Try exact-ish name match first
+  const match = forms.find((f) => lower.includes(f.name.toLowerCase()))
+  if (match) return match
+  // Keyword match
+  const keywords: Record<string, string[]> = {
+    "bank-account": ["bank", "td", "account"],
+    "transit-card": ["transit", "ttc", "disability", "discount"],
+    "cra-benefits": ["cra", "benefits", "tax"],
+  }
+  for (const form of forms) {
+    const kws = keywords[form.id] ?? form.name.toLowerCase().split(/\s+/)
+    if (kws.some((kw) => lower.includes(kw))) return form
+  }
+  return null
+}
+
 function AppContent() {
   const echo = useEchoAccess()
   const voice = useVoice()
   const hasInitialized = useRef(false)
+  const voiceFormSelectionRef = useRef(false)
+  const hasGreetedRef = useRef(false)
 
   // Load forms and init session on mount
   useEffect(() => {
@@ -39,13 +59,29 @@ function AppContent() {
     echo.initSession()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Voice greeting when forms first load
+  useEffect(() => {
+    if (echo.forms.length > 0 && !hasGreetedRef.current && voice.supported) {
+      hasGreetedRef.current = true
+      const names = echo.forms.map((f) => f.name).join(", ")
+      voice
+        .speak(`Welcome to EchoAccess! Which form would you like to fill out? Your options are: ${names}.`)
+        .then(() => {
+          voiceFormSelectionRef.current = true
+          voice.startListening()
+        })
+    }
+  }, [echo.forms]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleFormSelect = useCallback(
     async (form: FormInfo) => {
       const fields = await echo.selectForm(form)
       if (fields) {
         const question = await echo.askNextQuestion(fields, 0)
         if (question) {
-          voice.speak(question)
+          voice.speak(question).then(() => {
+            if (voice.supported) voice.startListening()
+          })
         }
       }
     },
@@ -68,7 +104,9 @@ function AppContent() {
         } else {
           voice.speak(
             "No problem. You can change any answer by telling me which field to update."
-          )
+          ).then(() => {
+            if (voice.supported) voice.startListening()
+          })
         }
         return
       }
@@ -80,17 +118,39 @@ function AppContent() {
 
       const question = await echo.askNextQuestion(undefined, nextIdx)
       if (question) {
-        voice.speak(question)
+        voice.speak(question).then(() => {
+          if (voice.supported) voice.startListening()
+        })
       }
     },
     [echo, voice]
   )
 
-  // When voice transcript changes, submit it as an answer
+  // When voice transcript changes, handle it
   useEffect(() => {
-    if (voice.transcript && (echo.flow === "FIELD_LOOP" || echo.flow === "CONFIRMING")) {
-      voice.clearTranscript()
-      handleUserInput(voice.transcript)
+    if (!voice.transcript) return
+    const t = voice.transcript
+    voice.clearTranscript()
+
+    // Voice form selection during IDLE
+    if (voiceFormSelectionRef.current && echo.flow === "IDLE") {
+      voiceFormSelectionRef.current = false
+      const matched = matchFormByVoice(t, echo.forms)
+      if (matched) {
+        handleFormSelect(matched)
+      } else {
+        voice
+          .speak("I didn't catch that. Please say a form name or select from the dropdown.")
+          .then(() => {
+            voiceFormSelectionRef.current = true
+            voice.startListening()
+          })
+      }
+      return
+    }
+
+    if (echo.flow === "FIELD_LOOP" || echo.flow === "CONFIRMING") {
+      handleUserInput(t)
     }
   }, [voice.transcript]) // eslint-disable-line react-hooks/exhaustive-deps
 

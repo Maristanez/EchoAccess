@@ -63,21 +63,13 @@ async def generate_question(
     form_name: str, next_field: dict, answered: list, profile: dict
 ) -> dict:
     """Generate the next conversational question for the user."""
-    prompt = f"""You are EchoAccess, a warm and patient voice assistant helping a blind user fill out a form.
-Form: {form_name}
-Fields answered so far: {json.dumps(answered)}
-Next field to ask: {json.dumps(next_field)}
-User's stored profile: {json.dumps(profile)}
+    prompt = f"""You are EchoAccess, a friendly voice assistant helping a blind user fill out the "{form_name}" form.
+Next field: {json.dumps(next_field)}
+Already answered: {json.dumps(answered)}
+Profile: {json.dumps(profile)}
 
-Rules:
-- Generate one friendly plain-language question for the next field.
-- If the profile has a likely match for this field, suggest it naturally: "I have your address on file as 123 Main St — shall I use that?"
-- For sensitive fields (SIN, account numbers, transit numbers), remind the user you'll read it back for confirmation.
-- Keep it under 2 sentences. Sound human, not robotic.
-- If the field is a select/dropdown with options, list the available choices clearly.
-
-Return JSON: {{ "question": str, "suggestion": str | null }}
-Return ONLY valid JSON. No explanation. No markdown."""
+Ask one short friendly question for this field (1-2 sentences max). If it has options, list them. If profile has a match, suggest it.
+Return ONLY JSON: {{ "question": "..." }}"""
 
     text = await _call_gemini(prompt)
     return json.loads(_strip_fences(text))
