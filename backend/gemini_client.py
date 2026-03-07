@@ -1,9 +1,10 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import os
 import json
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-flash")
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+MODEL = "gemini-2.5-flash"
 
 
 async def parse_form_html(raw_html: str) -> list[dict]:
@@ -15,9 +16,8 @@ HTML:
 {raw_html}
 Return ONLY valid JSON array. No explanation. No markdown."""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model=MODEL, contents=prompt)
     text = response.text.strip()
-    # Strip markdown code fences if present
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else text[3:]
         if text.endswith("```"):
@@ -41,7 +41,7 @@ Keep it under 2 sentences. Sound human, not robotic.
 Return JSON: {{ "question": str, "suggestion": str | null }}
 Return ONLY valid JSON. No explanation. No markdown."""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model=MODEL, contents=prompt)
     text = response.text.strip()
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else text[3:]
@@ -59,7 +59,7 @@ Group related fields (address together, personal info together).
 Use natural speech. End with: "Would you like me to submit this, or is there anything you'd like to change?"
 Return plain text only."""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model=MODEL, contents=prompt)
     return response.text
 
 
@@ -70,5 +70,5 @@ Rewrite each error in plain friendly language for a blind user hearing it via te
 No jargon. No "field is invalid." Say exactly what needs fixing and how.
 Return a simple numbered list."""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model=MODEL, contents=prompt)
     return response.text
