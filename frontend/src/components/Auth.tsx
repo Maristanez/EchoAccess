@@ -10,9 +10,9 @@ export function Auth() {
         <div className="flex h-screen w-screen items-center justify-center bg-background">
             <div className="w-full max-w-md p-8 bg-card rounded-xl border shadow-sm">
                 <div className="mb-6 text-center">
-                    <h1 className="text-2xl font-bold tracking-tight mb-2">
-                        <span className="text-blue-500">Echo</span>
-                        <span className="text-emerald-500">Access</span>
+                    <h1 className="font-display text-2xl font-bold tracking-tight mb-2">
+                        <span className="text-brand-primary">Echo</span>
+                        <span className="text-text-primary">Access</span>
                     </h1>
                     <p className="text-muted-foreground text-sm">Sign in to your account</p>
                 </div>

@@ -114,8 +114,8 @@ function AppContent() {
       {/* Top Bar */}
       <header className="border-b px-4 py-3 flex items-center gap-4 shrink-0">
         <h1 className="text-xl font-bold tracking-tight">
-          <span className="text-blue-500">Echo</span>
-          <span className="text-emerald-500">Access</span>
+          <span className="text-brand-primary">Echo</span>
+          <span className="text-text-primary">Access</span>
         </h1>
         <Separator orientation="vertical" className="h-6" />
         <FormSelector
