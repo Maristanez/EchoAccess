@@ -1,0 +1,236 @@
+import { useEffect, useCallback, useRef } from "react"
+import { useEchoAccess } from "@/hooks/useEchoAccess"
+import { useVoice } from "@/hooks/useVoice"
+import { ChatPanel } from "@/components/ChatPanel"
+import { FormPreview } from "@/components/FormPreview"
+import { FormSelector } from "@/components/FormSelector"
+import { WelcomeBanner } from "@/components/WelcomeBanner"
+import { ProgressBar } from "@/components/ProgressBar"
+import { Confetti } from "@/components/magicui/confetti"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { RotateCcw, CheckCircle2 } from "lucide-react"
+import type { FormInfo } from "@/types"
+
+export default function App() {
+  const echo = useEchoAccess()
+  const voice = useVoice()
+  const hasInitialized = useRef(false)
+
+  // Load forms and init session on mount
+  useEffect(() => {
+    if (hasInitialized.current) return
+    hasInitialized.current = true
+    echo.loadForms()
+    echo.initSession()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When voice transcript changes, submit it as an answer
+  useEffect(() => {
+    if (voice.transcript && echo.flow === "FIELD_LOOP") {
+      handleUserInput(voice.transcript)
+    }
+  }, [voice.transcript]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFormSelect = useCallback(
+    async (form: FormInfo) => {
+      const fields = await echo.selectForm(form)
+      if (fields) {
+        const question = await echo.askNextQuestion(fields, 0)
+        if (question) {
+          voice.speak(question)
+        }
+      }
+    },
+    [echo, voice] // eslint-disable-line react-hooks/exhaustive-deps
+  )
+
+  const handleUserInput = useCallback(
+    async (text: string) => {
+      if (echo.flow === "CONFIRMING") {
+        const lower = text.toLowerCase()
+        if (
+          lower.includes("yes") ||
+          lower.includes("submit") ||
+          lower.includes("confirm")
+        ) {
+          echo.confirmSubmit()
+          voice.speak(
+            "Your form has been submitted successfully! Thank you."
+          )
+        } else {
+          voice.speak(
+            "No problem. You can change any answer by telling me which field to update."
+          )
+        }
+        return
+      }
+
+      if (echo.flow !== "FIELD_LOOP") return
+
+      const nextIdx = await echo.submitAnswer(text)
+      if (nextIdx === null) return
+
+      const question = await echo.askNextQuestion(undefined, nextIdx)
+      if (question) {
+        voice.speak(question)
+      }
+    },
+    [echo, voice] // eslint-disable-line react-hooks/exhaustive-deps
+  )
+
+  const toggleVoice = useCallback(() => {
+    if (voice.isListening) {
+      voice.stopListening()
+    } else {
+      voice.cancelSpeech()
+      voice.startListening()
+    }
+  }, [voice])
+
+  const isFormActive =
+    echo.flow === "FIELD_LOOP" ||
+    echo.flow === "CONFIRMING" ||
+    echo.flow === "PARSING"
+
+  const showFormPreview = isFormActive || echo.flow === "SUBMITTED"
+
+  return (
+    <div className="flex flex-col h-screen bg-background text-foreground">
+      {/* Top Bar */}
+      <header className="border-b px-4 py-3 flex items-center gap-4 shrink-0">
+        <h1 className="text-xl font-bold tracking-tight">
+          <span className="text-blue-500">Echo</span>
+          <span className="text-emerald-500">Access</span>
+        </h1>
+        <Separator orientation="vertical" className="h-6" />
+        <FormSelector
+          forms={echo.forms}
+          selectedForm={echo.selectedForm}
+          onSelect={handleFormSelect}
+          disabled={echo.isLoading}
+        />
+        {showFormPreview && (
+          <>
+            <Separator orientation="vertical" className="h-6" />
+            <ProgressBar
+              current={Math.min(echo.currentFieldIndex, echo.fields.length)}
+              total={echo.fields.length}
+              percent={echo.completionPercent}
+            />
+          </>
+        )}
+        <div className="flex-1" />
+        {echo.flow !== "IDLE" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={echo.reset}
+            aria-label="Start over"
+          >
+            <RotateCcw className="h-4 w-4 mr-1" />
+            Start Over
+          </Button>
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex overflow-hidden">
+        {echo.flow === "IDLE" ? (
+          <div className="flex-1 flex items-center justify-center">
+            <WelcomeBanner />
+          </div>
+        ) : (
+          <>
+            {/* Chat Panel */}
+            <div className="flex-1 lg:w-3/5 border-r flex flex-col">
+              <ChatPanel
+                messages={echo.messages}
+                isListening={voice.isListening}
+                isSpeaking={voice.isSpeaking}
+                isLoading={echo.isLoading}
+                voiceSupported={voice.supported}
+                onSend={handleUserInput}
+                onToggleVoice={toggleVoice}
+                disabled={
+                  echo.flow === "SUBMITTED" || echo.flow === "PARSING"
+                }
+              />
+            </div>
+
+            {/* Form Preview */}
+            {showFormPreview && (
+              <div className="hidden lg:block lg:w-2/5 p-4 overflow-y-auto">
+                <FormPreview
+                  formName={echo.selectedForm?.name ?? ""}
+                  fields={echo.fields}
+                  currentFieldIndex={echo.currentFieldIndex}
+                  answers={echo.answers}
+                  completionPercent={echo.completionPercent}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {/* Success state */}
+      {echo.flow === "SUBMITTED" && (
+        <Alert className="m-4 border-emerald-500/50 bg-emerald-500/10">
+          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+          <AlertDescription className="text-emerald-400">
+            Form submitted successfully! You can select another form or start
+            over.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Confetti */}
+      <Confetti active={echo.flow === "SUBMITTED"} />
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={echo.flow === "CONFIRMING" && !!echo.summary}
+        onOpenChange={() => {}}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Review Your Answers</DialogTitle>
+            <DialogDescription>{echo.summary}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={echo.reset}>
+              Start Over
+            </Button>
+            <Button
+              onClick={() => {
+                echo.confirmSubmit()
+                voice.speak(
+                  "Your form has been submitted successfully! Thank you."
+                )
+              }}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-1" />
+              Submit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Footer */}
+      <footer className="border-t px-4 py-2 text-xs text-muted-foreground text-center shrink-0">
+        Tab to navigate · Enter to confirm · Esc to go back · Powered by Gemini
+        + Backboard.io
+      </footer>
+    </div>
+  )
+}

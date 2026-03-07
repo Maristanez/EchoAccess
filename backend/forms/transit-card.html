@@ -1,0 +1,58 @@
+<form id="ttc-disability-discount-card" aria-label="TTC Disability Discount Card Application">
+  <fieldset>
+    <legend>Personal Information</legend>
+
+    <label for="full_name">Full Name</label>
+    <input type="text" id="full_name" name="full_name" required placeholder="Enter your full legal name" />
+
+    <label for="date_of_birth">Date of Birth</label>
+    <input type="date" id="date_of_birth" name="date_of_birth" required />
+
+    <fieldset>
+      <legend>Are you an ODSP or CPP Disability Recipient?</legend>
+      <label><input type="radio" name="odsp_cpp_recipient" value="yes" required /> Yes</label>
+      <label><input type="radio" name="odsp_cpp_recipient" value="no" /> No</label>
+    </fieldset>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contact Information</legend>
+
+    <label for="address">Street Address</label>
+    <input type="text" id="address" name="address" required placeholder="123 Main Street" />
+
+    <label for="city">City</label>
+    <input type="text" id="city" name="city" required placeholder="Toronto" />
+
+    <label for="postal_code">Postal Code</label>
+    <input type="text" id="postal_code" name="postal_code" required placeholder="M5V 1A1" />
+
+    <label for="phone">Phone Number</label>
+    <input type="tel" id="phone" name="phone" required placeholder="(416) 555-0123" />
+
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" required placeholder="example@email.com" />
+  </fieldset>
+
+  <fieldset>
+    <legend>Disability Information</legend>
+
+    <label for="disability_type">Type of Disability</label>
+    <select id="disability_type" name="disability_type" required>
+      <option value="">Select type of disability</option>
+      <option value="visual">Visual</option>
+      <option value="hearing">Hearing</option>
+      <option value="mobility">Mobility</option>
+      <option value="cognitive">Cognitive</option>
+      <option value="other">Other</option>
+    </select>
+
+    <label for="supporting_documentation">Supporting Documentation</label>
+    <input type="text" id="supporting_documentation" name="supporting_documentation" placeholder="Describe or paste a link to your supporting document" />
+
+    <label for="signature_date">Signature Date</label>
+    <input type="date" id="signature_date" name="signature_date" required />
+  </fieldset>
+
+  <button type="submit">Submit Application</button>
+</form>

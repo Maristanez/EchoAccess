@@ -1,0 +1,73 @@
+<form id="cra-benefits-application" aria-label="CRA Benefits Application">
+  <fieldset>
+    <legend>Personal Information</legend>
+
+    <label for="first_name">First Name</label>
+    <input type="text" id="first_name" name="first_name" required placeholder="Enter your legal first name" />
+
+    <label for="last_name">Last Name</label>
+    <input type="text" id="last_name" name="last_name" required placeholder="Enter your legal last name" />
+
+    <label for="sin">Social Insurance Number (SIN)</label>
+    <input type="text" id="sin" name="sin" required placeholder="9-digit SIN" />
+
+    <label for="date_of_birth">Date of Birth</label>
+    <input type="date" id="date_of_birth" name="date_of_birth" required />
+
+    <label for="marital_status">Marital Status</label>
+    <select id="marital_status" name="marital_status" required>
+      <option value="">Select marital status</option>
+      <option value="single">Single</option>
+      <option value="married">Married</option>
+      <option value="common-law">Common-Law</option>
+      <option value="divorced">Divorced</option>
+      <option value="widowed">Widowed</option>
+    </select>
+
+    <label for="num_dependents">Number of Dependents</label>
+    <input type="number" id="num_dependents" name="num_dependents" min="0" placeholder="0" />
+  </fieldset>
+
+  <fieldset>
+    <legend>Mailing Address</legend>
+
+    <label for="mailing_address">Mailing Address</label>
+    <input type="text" id="mailing_address" name="mailing_address" required placeholder="123 Main Street" />
+
+    <label for="province">Province</label>
+    <select id="province" name="province" required>
+      <option value="">Select a province</option>
+      <option value="ON">Ontario</option>
+      <option value="BC">British Columbia</option>
+      <option value="AB">Alberta</option>
+      <option value="QC">Quebec</option>
+      <option value="MB">Manitoba</option>
+      <option value="SK">Saskatchewan</option>
+      <option value="NS">Nova Scotia</option>
+      <option value="NB">New Brunswick</option>
+      <option value="PE">Prince Edward Island</option>
+      <option value="NL">Newfoundland and Labrador</option>
+      <option value="NT">Northwest Territories</option>
+      <option value="YT">Yukon</option>
+      <option value="NU">Nunavut</option>
+    </select>
+
+    <label for="postal_code">Postal Code</label>
+    <input type="text" id="postal_code" name="postal_code" required placeholder="M5V 1A1" />
+  </fieldset>
+
+  <fieldset>
+    <legend>Direct Deposit Information</legend>
+
+    <label for="bank_name">Bank Name</label>
+    <input type="text" id="bank_name" name="bank_name" required placeholder="e.g. TD Canada Trust" />
+
+    <label for="transit_number">Transit Number</label>
+    <input type="text" id="transit_number" name="transit_number" required placeholder="5-digit transit number" />
+
+    <label for="account_number">Account Number</label>
+    <input type="text" id="account_number" name="account_number" required placeholder="Your bank account number" />
+  </fieldset>
+
+  <button type="submit">Submit Application</button>
+</form>
