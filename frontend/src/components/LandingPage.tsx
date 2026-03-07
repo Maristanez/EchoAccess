@@ -50,7 +50,7 @@ function VoiceOrb() {
         <motion.div
           key={`breath-${i}`}
           aria-hidden="true"
-          className="absolute rounded-full border border-lime/30"
+          className="absolute rounded-full border border-black/5 dark:border-brand-primary/30"
           style={{ width: 180 + i * 40, height: 180 + i * 40 }}
           animate={{ scale: [1, 1.25, 1], opacity: [0.4, 0.1, 0.4] }}
           transition={{
@@ -77,7 +77,7 @@ function VoiceOrb() {
       {/* Glowing core */}
       <div
         aria-hidden="true"
-        className="absolute w-32 h-32 rounded-full"
+        className="absolute w-32 h-32 rounded-full hidden dark:block"
         style={{
           background: "radial-gradient(circle, #e8ff5a55 0%, transparent 70%)",
           filter: "blur(8px)",
@@ -87,7 +87,7 @@ function VoiceOrb() {
       {/* Pulsing lime disc */}
       <motion.div
         aria-hidden="true"
-        className="absolute w-24 h-24 rounded-full bg-lime"
+        className="absolute w-24 h-24 rounded-full bg-brand-primary"
         animate={{ scale: [1, 1.08, 1] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -115,7 +115,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
       aria-label="Primary navigation"
     >
       <span className="font-display font-bold text-xl tracking-tight">
-        <span className="text-lime">Echo</span>
+        <span className="text-brand-primary">Echo</span>
         <span className="text-text-primary">Access</span>
       </span>
 
@@ -123,7 +123,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
         <li role="listitem">
           <a
             href="#how-it-works"
-            className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+            className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
           >
             How it Works
           </a>
@@ -131,7 +131,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
         <li role="listitem">
           <a
             href="#use-cases"
-            className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+            className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
           >
             Use Cases
           </a>
@@ -139,7 +139,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
         <li role="listitem">
           <a
             href="#features"
-            className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+            className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
           >
             Features
           </a>
@@ -150,7 +150,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
         <ThemeToggle />
         <button
           onClick={onEnter}
-          className="px-4 py-2 rounded-full bg-lime text-black text-sm font-semibold hover:bg-lime/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-page"
+          className="px-4 py-2 rounded-full bg-brand-primary text-white dark:text-black text-sm font-semibold hover:bg-brand-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-page"
         >
           Try Demo
         </button>
@@ -187,7 +187,7 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
             variants={fadeUpVariants}
             custom={0.1}
           >
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-lime/30 text-lime text-xs font-semibold tracking-wider uppercase">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-primary/30 text-brand-primary text-xs font-semibold tracking-wider uppercase">
               <span aria-hidden="true">●</span> Voice-First Accessibility
             </span>
           </motion.div>
@@ -201,7 +201,7 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
             custom={0.2}
           >
             Forms, spoken.<br />
-            <span className="text-lime">Barriers,</span> broken.
+            <span className="text-brand-primary">Barriers,</span> broken.
           </motion.h1>
 
           <motion.p
@@ -224,13 +224,13 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
           >
             <button
               onClick={onEnter}
-              className="px-7 py-3.5 rounded-full bg-lime text-black font-bold text-base hover:bg-lime/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-page"
+              className="px-7 py-3.5 rounded-full bg-brand-primary text-white dark:text-black font-bold text-base hover:bg-brand-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-page"
             >
               Launch Demo
             </button>
             <a
               href="#how-it-works"
-              className="text-text-primary/60 hover:text-text-primary text-sm underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+              className="text-text-primary/60 hover:text-text-primary text-sm underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
             >
               See how it works
             </a>
@@ -273,7 +273,7 @@ function MarqueeBar() {
   return (
     <div
       aria-hidden="true"
-      className="w-full overflow-hidden bg-lime py-3 border-y border-lime/50"
+      className="w-full overflow-hidden bg-brand-primary py-3 border-y border-brand-primary/50"
     >
       <div
         className="flex whitespace-nowrap"
@@ -282,7 +282,7 @@ function MarqueeBar() {
         {items.map((label, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-4 px-6 font-display font-bold text-sm text-black uppercase tracking-widest"
+            className="inline-flex items-center gap-4 px-6 font-display font-bold text-sm text-white dark:text-black uppercase tracking-widest"
           >
             {label}
             <span className="opacity-40">✦</span>
@@ -327,8 +327,8 @@ function ChatMockup() {
       style={{ transform: "rotate(2deg)" }}
     >
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-6 h-6 rounded-full bg-lime flex items-center justify-center">
-          <Mic aria-hidden="true" className="w-3 h-3 text-black" />
+        <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
+          <Mic aria-hidden="true" className="w-3 h-3 text-white dark:text-black" />
         </div>
         <span className="text-xs font-semibold text-text-primary">EchoAccess</span>
       </div>
@@ -339,7 +339,7 @@ function ChatMockup() {
               className={`text-xs px-3 py-2 rounded-xl max-w-[80%] ${
                 m.from === "ai"
                   ? "bg-text-primary/[0.08] text-text-primary/80"
-                  : "bg-lime text-black font-medium"
+                  : "bg-brand-primary text-white dark:text-black font-medium"
               }`}
             >
               {m.text}
@@ -399,7 +399,7 @@ function HowItWorksSection() {
           <ol className="flex flex-col gap-10" role="list">
             {STEPS.map((s) => (
               <motion.li key={s.num} role="listitem" variants={cardItemVariants} className="flex gap-6">
-                <span className="font-display font-bold text-4xl text-lime/30 leading-none w-12 shrink-0">
+                <span className="font-display font-bold text-4xl text-brand-primary/30 leading-none w-12 shrink-0">
                   {s.num}
                 </span>
                 <div>
@@ -461,7 +461,7 @@ function UseCasesSection() {
             variants={cardItemVariants}
           >
             Built for every door<br />
-            <span className="text-lime">that should be open.</span>
+            <span className="text-brand-primary">that should be open.</span>
           </motion.h2>
           <motion.p className="text-text-primary/50 mb-12 max-w-lg" variants={cardItemVariants}>
             From federal benefits to local transit — EchoAccess handles the forms
@@ -539,7 +539,7 @@ function FeaturesSection() {
             variants={cardItemVariants}
           >
             Everything you need.<br />
-            <span className="text-lime">Nothing you don't.</span>
+            <span className="text-brand-primary">Nothing you don't.</span>
           </motion.h2>
           <motion.p className="text-text-primary/50 mb-12 max-w-lg" variants={cardItemVariants}>
             Carefully designed features that work together to remove every barrier
@@ -559,8 +559,8 @@ function FeaturesSection() {
                   variants={cardItemVariants}
                   className="bg-surface-card border border-surface-border rounded-2xl p-8"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-lime/10 flex items-center justify-center mb-5">
-                    <Icon aria-hidden="true" className="w-5 h-5 text-lime" />
+                  <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center mb-5">
+                    <Icon aria-hidden="true" className="w-5 h-5 text-brand-primary" />
                   </div>
                   <h3 className="font-display font-bold text-xl text-text-primary mb-2">{f.title}</h3>
                   <p className="text-text-primary/50 leading-relaxed">{f.desc}</p>
@@ -598,7 +598,7 @@ function CtaSection({ onEnter }: { onEnter: () => void }) {
           className="font-display font-extrabold text-4xl lg:text-5xl text-text-primary mb-4"
         >
           Ready to break down<br />
-          <span className="text-lime">the barrier?</span>
+          <span className="text-brand-primary">the barrier?</span>
         </h2>
         <p className="text-text-primary/50 mb-10 max-w-md mx-auto leading-relaxed">
           Try EchoAccess right now — no sign-up, no download, no cost.
@@ -606,7 +606,7 @@ function CtaSection({ onEnter }: { onEnter: () => void }) {
         </p>
         <button
           onClick={onEnter}
-          className="px-8 py-4 rounded-full bg-text-primary text-surface-page font-bold text-base hover:bg-text-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-card"
+          className="px-8 py-4 rounded-full bg-text-primary text-surface-page font-bold text-base hover:bg-text-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-card"
         >
           Launch EchoAccess
         </button>
@@ -621,7 +621,7 @@ function FooterSection() {
   return (
     <footer className="bg-surface-page border-t border-surface-border px-6 lg:px-12 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <span className="font-display font-bold text-base">
-        <span className="text-lime">Echo</span>
+        <span className="text-brand-primary">Echo</span>
         <span className="text-text-primary">Access</span>
       </span>
       <p className="text-text-primary/30 text-sm">
@@ -632,7 +632,7 @@ function FooterSection() {
           <li role="listitem">
             <a
               href="#how-it-works"
-              className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+              className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
             >
               How it Works
             </a>
@@ -640,7 +640,7 @@ function FooterSection() {
           <li role="listitem">
             <a
               href="#use-cases"
-              className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+              className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
             >
               Use Cases
             </a>
@@ -648,7 +648,7 @@ function FooterSection() {
           <li role="listitem">
             <a
               href="#features"
-              className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime rounded"
+              className="hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded"
             >
               Features
             </a>

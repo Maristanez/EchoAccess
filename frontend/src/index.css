@@ -48,6 +48,7 @@
     --text-primary:    #0d0d0d;
     --ring-offset-page: #f9f9f9;
     --ring-offset-card: #ffffff;
+    --brand-primary: #059669;
 }
 
 .dark {
@@ -91,6 +92,7 @@
     --text-primary:    #ffffff;
     --ring-offset-page: #0a0a0a;
     --ring-offset-card: #161616;
+    --brand-primary: #e8ff5a;
 }
 
 @theme inline {
@@ -134,7 +136,7 @@
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
     --font-display: 'Syne', sans-serif;
-    --color-lime: #e8ff5a;
+    --color-brand-primary: var(--brand-primary);
     --color-surface-page:       var(--surface-page);
     --color-surface-section:    var(--surface-section);
     --color-surface-card:       var(--surface-card);
