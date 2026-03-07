@@ -4,8 +4,8 @@ export function WelcomeBanner() {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <h1 className="text-4xl font-bold tracking-tight mb-2">
-        <span className="text-blue-500">Echo</span>
-        <span className="text-emerald-500">Access</span>
+        <span className="text-brand-primary">Echo</span>
+        <span className="text-text-primary">Access</span>
       </h1>
       <TypingAnimation
         text="Voice-first form filling for everyone."
