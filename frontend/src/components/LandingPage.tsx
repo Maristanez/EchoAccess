@@ -1,31 +1,22 @@
-import { useRef } from "react"
-import { motion, useInView } from "framer-motion"
+import { motion } from "framer-motion"
 import { Mic, Brain, Layers, Lock } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 
 // ─── Animation variants ──────────────────────────────────────────────────────
 
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const, delay },
-  }),
+const slideUpVariant = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } },
 }
 
-const staggerContainerVariants = {
+const slideDownVariant = {
+  hidden: { opacity: 0, y: -30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } },
+}
+
+const staggerContainer = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
-}
-
-const cardItemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  },
+  visible: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } },
 }
 
 // ─── VoiceOrb ────────────────────────────────────────────────────────────────
@@ -95,7 +86,7 @@ function VoiceOrb() {
       {/* Mic icon */}
       <Mic
         aria-hidden="true"
-        className="relative z-10 w-10 h-10 text-black"
+        className="relative z-10 w-10 h-10 text-white dark:text-black"
         strokeWidth={2.5}
       />
     </div>
@@ -109,8 +100,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
     <motion.nav
       initial="hidden"
       animate="visible"
-      variants={fadeUpVariants}
-      custom={0}
+      variants={slideDownVariant}
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-surface-nav backdrop-blur-md border-b border-surface-border"
       aria-label="Primary navigation"
     >
@@ -178,15 +168,15 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center">
+      <motion.div
+        className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Left */}
-        <div className="flex flex-col gap-6">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            custom={0.1}
-          >
+        <motion.div className="flex flex-col gap-6" variants={staggerContainer}>
+          <motion.div variants={slideUpVariant}>
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-primary/30 text-brand-primary text-xs font-semibold tracking-wider uppercase">
               <span aria-hidden="true">●</span> Voice-First Accessibility
             </span>
@@ -195,10 +185,7 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
           <motion.h1
             id="hero-heading"
             className="font-display font-extrabold text-5xl lg:text-6xl xl:text-7xl leading-[1.05] text-text-primary"
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            custom={0.2}
+            variants={slideDownVariant}
           >
             Forms, spoken.<br />
             <span className="text-brand-primary">Barriers,</span> broken.
@@ -206,10 +193,7 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
 
           <motion.p
             className="text-lg text-text-primary/60 max-w-md leading-relaxed"
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            custom={0.3}
+            variants={slideUpVariant}
           >
             EchoAccess transforms complex government and institutional forms into
             guided voice conversations — so anyone can complete them independently.
@@ -217,10 +201,7 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
 
           <motion.div
             className="flex flex-wrap items-center gap-4"
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariants}
-            custom={0.4}
+            variants={slideUpVariant}
           >
             <button
               onClick={onEnter}
@@ -235,19 +216,16 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
               See how it works
             </a>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Right — Orb */}
         <motion.div
           className="hidden lg:flex justify-center items-center"
-          initial="hidden"
-          animate="visible"
-          variants={fadeUpVariants}
-          custom={0.3}
+          variants={slideUpVariant}
         >
           <VoiceOrb />
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   )
 }
@@ -372,13 +350,9 @@ const STEPS = [
 ]
 
 function HowItWorksSection() {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-80px 0px" })
-
   return (
     <section
       id="how-it-works"
-      ref={ref}
       aria-labelledby="how-heading"
       className="bg-surface-page py-28 px-6 lg:px-12"
     >
@@ -386,19 +360,20 @@ function HowItWorksSection() {
         {/* Left: steps */}
         <motion.div
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={staggerContainerVariants}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px 0px" }}
+          variants={staggerContainer}
         >
           <motion.h2
             id="how-heading"
             className="font-display font-extrabold text-4xl lg:text-5xl text-text-primary mb-12"
-            variants={cardItemVariants}
+            variants={slideDownVariant}
           >
             How it works
           </motion.h2>
-          <ol className="flex flex-col gap-10" role="list">
+          <motion.ol className="flex flex-col gap-10" role="list" variants={staggerContainer}>
             {STEPS.map((s) => (
-              <motion.li key={s.num} role="listitem" variants={cardItemVariants} className="flex gap-6">
+              <motion.li key={s.num} role="listitem" variants={slideUpVariant} className="flex gap-6">
                 <span className="font-display font-bold text-4xl text-brand-primary/30 leading-none w-12 shrink-0">
                   {s.num}
                 </span>
@@ -408,16 +383,16 @@ function HowItWorksSection() {
                 </div>
               </motion.li>
             ))}
-          </ol>
+          </motion.ol>
         </motion.div>
 
         {/* Right: mockups */}
         <motion.div
           className="relative h-[400px] hidden lg:block"
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={fadeUpVariants}
-          custom={0.2}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px 0px" }}
+          variants={slideUpVariant}
         >
           <FormMockup />
           <ChatMockup />
@@ -439,44 +414,42 @@ const USE_CASES = [
 ]
 
 function UseCasesSection() {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-80px 0px" })
-
   return (
     <section
       id="use-cases"
-      ref={ref}
       aria-labelledby="usecases-heading"
       className="bg-surface-section py-28 px-6 lg:px-12"
     >
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={staggerContainerVariants}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px 0px" }}
+          variants={staggerContainer}
         >
           <motion.h2
             id="usecases-heading"
             className="font-display font-extrabold text-4xl lg:text-5xl text-text-primary mb-4"
-            variants={cardItemVariants}
+            variants={slideDownVariant}
           >
             Built for every door<br />
             <span className="text-brand-primary">that should be open.</span>
           </motion.h2>
-          <motion.p className="text-text-primary/50 mb-12 max-w-lg" variants={cardItemVariants}>
+          <motion.p className="text-text-primary/50 mb-12 max-w-lg" variants={slideUpVariant}>
             From federal benefits to local transit — EchoAccess handles the forms
             that matter most.
           </motion.p>
 
-          <ul
+          <motion.ul
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
             role="list"
+            variants={staggerContainer}
           >
             {USE_CASES.map((uc) => (
               <motion.li
                 key={uc.title}
                 role="listitem"
-                variants={cardItemVariants}
+                variants={slideUpVariant}
                 whileHover={{ scale: 1.02, y: -2 }}
                 className="bg-surface-card border border-surface-border rounded-2xl p-6 cursor-default"
               >
@@ -484,7 +457,7 @@ function UseCasesSection() {
                 <p className="text-text-primary/50 text-sm leading-relaxed">{uc.desc}</p>
               </motion.li>
             ))}
-          </ul>
+          </motion.ul>
         </motion.div>
       </div>
     </section>
@@ -517,38 +490,36 @@ const FEATURES = [
 ]
 
 function FeaturesSection() {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-80px 0px" })
-
   return (
     <section
       id="features"
-      ref={ref}
       aria-labelledby="features-heading"
       className="bg-surface-page py-28 px-6 lg:px-12"
     >
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={staggerContainerVariants}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px 0px" }}
+          variants={staggerContainer}
         >
           <motion.h2
             id="features-heading"
             className="font-display font-extrabold text-4xl lg:text-5xl text-text-primary mb-4"
-            variants={cardItemVariants}
+            variants={slideDownVariant}
           >
             Everything you need.<br />
             <span className="text-brand-primary">Nothing you don't.</span>
           </motion.h2>
-          <motion.p className="text-text-primary/50 mb-12 max-w-lg" variants={cardItemVariants}>
+          <motion.p className="text-text-primary/50 mb-12 max-w-lg" variants={slideUpVariant}>
             Carefully designed features that work together to remove every barrier
             between a user and a completed form.
           </motion.p>
 
-          <ul
+          <motion.ul
             className="grid grid-cols-1 sm:grid-cols-2 gap-6"
             role="list"
+            variants={staggerContainer}
           >
             {FEATURES.map((f) => {
               const Icon = f.icon
@@ -556,7 +527,7 @@ function FeaturesSection() {
                 <motion.li
                   key={f.title}
                   role="listitem"
-                  variants={cardItemVariants}
+                  variants={slideUpVariant}
                   className="bg-surface-card border border-surface-border rounded-2xl p-8"
                 >
                   <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center mb-5">
@@ -567,7 +538,7 @@ function FeaturesSection() {
                 </motion.li>
               )
             })}
-          </ul>
+          </motion.ul>
         </motion.div>
       </div>
     </section>
@@ -577,21 +548,17 @@ function FeaturesSection() {
 // ─── CtaSection ───────────────────────────────────────────────────────────────
 
 function CtaSection({ onEnter }: { onEnter: () => void }) {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-80px 0px" })
-
   return (
     <section
-      ref={ref}
       aria-labelledby="cta-heading"
       className="bg-surface-section py-28 px-6 lg:px-12"
     >
       <motion.div
         className="max-w-3xl mx-auto text-center bg-surface-card border border-surface-border rounded-3xl p-12 lg:p-16"
         initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        variants={fadeUpVariants}
-        custom={0}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px 0px" }}
+        variants={slideUpVariant}
       >
         <h2
           id="cta-heading"
