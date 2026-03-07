@@ -89,9 +89,10 @@ function AppContent() {
   // When voice transcript changes, submit it as an answer
   useEffect(() => {
     if (voice.transcript && (echo.flow === "FIELD_LOOP" || echo.flow === "CONFIRMING")) {
+      voice.clearTranscript()
       handleUserInput(voice.transcript)
     }
-  }, [voice.transcript, handleUserInput]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [voice.transcript]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleVoice = useCallback(() => {
     if (voice.isListening) {

@@ -25,7 +25,7 @@ HTML:
 {raw_html}
 Return ONLY valid JSON array. No explanation. No markdown."""
 
-    response = client.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
     return json.loads(_strip_fences(response.text))
 
 
@@ -49,7 +49,7 @@ Rules:
 Return JSON: {{ "question": str, "suggestion": str | null }}
 Return ONLY valid JSON. No explanation. No markdown."""
 
-    response = client.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
     return json.loads(_strip_fences(response.text))
 
 
@@ -61,7 +61,7 @@ Group related fields (address together, personal info together).
 Use natural speech. End with: "Would you like me to submit this, or is there anything you'd like to change?"
 Return plain text only."""
 
-    response = client.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
     return response.text
 
 
@@ -72,5 +72,5 @@ Rewrite each error in plain friendly language for a blind user hearing it via te
 No jargon. No "field is invalid." Say exactly what needs fixing and how.
 Return a simple numbered list."""
 
-    response = client.models.generate_content(model=MODEL, contents=prompt)
+    response = await client.aio.models.generate_content(model=MODEL, contents=prompt)
     return response.text

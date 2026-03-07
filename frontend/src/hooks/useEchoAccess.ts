@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import type { FormField, ChatMessage, FlowState, FormInfo, Answer } from "@/types"
 import { supabase } from "@/lib/supabase"
 
@@ -38,10 +38,30 @@ function makeId(): string {
 export function useEchoAccess() {
   const [flow, setFlow] = useState<FlowState>("IDLE")
   const [forms, setForms] = useState<FormInfo[]>([])
-  const [selectedForm, setSelectedForm] = useState<FormInfo | null>(null)
+  const [selectedForm, _setSelectedForm] = useState<FormInfo | null>(null)
+  const selectedFormRef = useRef<FormInfo | null>(null)
+  const setSelectedForm = (form: FormInfo | null) => {
+    selectedFormRef.current = form
+    _setSelectedForm(form)
+  }
+
   const [fields, setFields] = useState<FormField[]>([])
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0)
-  const [answers, setAnswers] = useState<Answer[]>([])
+
+  const [answers, _setAnswers] = useState<Answer[]>([])
+  const answersRef = useRef<Answer[]>([])
+  const setAnswers = (val: Answer[] | ((prev: Answer[]) => Answer[])) => {
+    if (typeof val === "function") {
+      _setAnswers((prev) => {
+        const next = val(prev)
+        answersRef.current = next
+        return next
+      })
+    } else {
+      answersRef.current = val
+      _setAnswers(val)
+    }
+  }
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [threadId, setThreadId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -136,8 +156,8 @@ export function useEchoAccess() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               thread_id: threadId,
-              form_name: selectedForm?.id,
-              answers,
+              form_name: selectedFormRef.current?.id,
+              answers: answersRef.current,
             }),
           })
           const data = await res.json()
@@ -161,10 +181,10 @@ export function useEchoAccess() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             thread_id: threadId,
-            form_name: selectedForm?.id ?? "",
+            form_name: selectedFormRef.current?.id ?? "",
             fields: currentFields,
             current_field_index: currentIdx,
-            answered: answers,
+            answered: answersRef.current,
           }),
         })
         const data = await res.json()
@@ -180,7 +200,7 @@ export function useEchoAccess() {
         return fallback
       }
     },
-    [fields, currentFieldIndex, threadId, selectedForm, answers, addMessage]
+    [fields, currentFieldIndex, threadId, addMessage]
   )
 
   const submitAnswer = useCallback(
@@ -195,7 +215,7 @@ export function useEchoAccess() {
         label: field.label,
         value,
       }
-      const newAnswers = [...answers, newAnswer]
+      const newAnswers = [...answersRef.current, newAnswer]
       setAnswers(newAnswers)
       const nextIdx = currentFieldIndex + 1
       setCurrentFieldIndex(nextIdx)
@@ -214,7 +234,7 @@ export function useEchoAccess() {
 
       return nextIdx
     },
-    [currentFieldIndex, fields, answers, threadId, addMessage]
+    [currentFieldIndex, fields, threadId, addMessage]
   )
 
   const confirmSubmit = useCallback(() => {

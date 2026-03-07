@@ -20,8 +20,6 @@ export function FormSelector({
   onSelect,
   disabled,
 }: FormSelectorProps) {
-  const items = forms.map((f) => ({ value: f.id, label: f.name }))
-
   return (
     <Select
       value={selectedForm?.id ?? null}
@@ -30,7 +28,6 @@ export function FormSelector({
         if (form) onSelect(form)
       }}
       disabled={disabled}
-      items={items}
     >
       <SelectTrigger className="w-[260px] bg-surface-card border-surface-border text-text-primary rounded-xl" aria-label="Select a form to fill out">
         <SelectValue

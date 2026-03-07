@@ -11,6 +11,7 @@ interface UseVoiceReturn {
   stopListening: () => void
   speak: (text: string) => Promise<void>
   cancelSpeech: () => void
+  clearTranscript: () => void
   supported: boolean
 }
 
@@ -81,6 +82,10 @@ export function useVoice(): UseVoiceReturn {
     setIsSpeaking(false)
   }, [])
 
+  const clearTranscript = useCallback(() => {
+    setTranscript("")
+  }, [])
+
   return {
     isListening,
     isSpeaking,
@@ -89,6 +94,7 @@ export function useVoice(): UseVoiceReturn {
     stopListening,
     speak,
     cancelSpeech,
+    clearTranscript,
     supported,
   }
 }

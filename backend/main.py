@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -22,7 +23,21 @@ from backboard_client import (
     ask_with_context,
 )
 
-app = FastAPI(title="EchoAccess API")
+ASSISTANT_ID = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global ASSISTANT_ID
+    try:
+        ASSISTANT_ID = await create_echoaccess_assistant()
+    except Exception as e:
+        print(f"Warning: Backboard init failed ({e}). Memory features disabled.")
+        ASSISTANT_ID = None
+    yield
+
+
+app = FastAPI(title="EchoAccess API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,8 +46,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-ASSISTANT_ID = None
 
 PROFILE_FIELD_MAP = {
     "name": "user_name",
@@ -58,16 +71,6 @@ def detect_profile_field(label: str) -> str | None:
         if keyword in label_lower:
             return profile_key
     return None
-
-
-@app.on_event("startup")
-async def startup():
-    global ASSISTANT_ID
-    try:
-        ASSISTANT_ID = await create_echoaccess_assistant()
-    except Exception as e:
-        print(f"Warning: Backboard init failed ({e}). Memory features disabled.")
-        ASSISTANT_ID = None
 
 
 # ── Request Models ──
