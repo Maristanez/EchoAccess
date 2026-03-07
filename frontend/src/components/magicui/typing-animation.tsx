@@ -11,10 +11,13 @@ export function TypingAnimation({ text, className, duration = 50 }: TypingAnimat
   const [displayed, setDisplayed] = useState("")
   const [index, setIndex] = useState(0)
 
-  useEffect(() => {
+  const [prevText, setPrevText] = useState(text)
+
+  if (text !== prevText) {
+    setPrevText(text)
     setDisplayed("")
     setIndex(0)
-  }, [text])
+  }
 
   useEffect(() => {
     if (index < text.length) {

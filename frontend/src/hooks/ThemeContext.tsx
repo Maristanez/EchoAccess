@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
 
 type Theme = "light" | "dark"
@@ -10,7 +11,7 @@ function getInitialTheme(): Theme {
   try {
     const s = localStorage.getItem(STORAGE_KEY)
     if (s === "light" || s === "dark") return s
-  } catch {}
+  } catch { /* localStorage unavailable */ }
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
 }
 
@@ -19,7 +20,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark")
-    try { localStorage.setItem(STORAGE_KEY, theme) } catch {}
+    try { localStorage.setItem(STORAGE_KEY, theme) } catch { /* localStorage unavailable */ }
   }, [theme])
 
   useEffect(() => {

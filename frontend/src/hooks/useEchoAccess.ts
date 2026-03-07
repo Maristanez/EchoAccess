@@ -98,7 +98,7 @@ export function useEchoAccess() {
           `I found ${parsedFields.length} fields. I'll ask you one at a time — just speak or type your answers.`
         )
         return parsedFields
-      } catch (err) {
+      } catch {
         addMessage(
           "assistant",
           "Sorry, I had trouble reading that form. Please try again."

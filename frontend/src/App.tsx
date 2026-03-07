@@ -39,13 +39,6 @@ function AppContent() {
     echo.initSession()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When voice transcript changes, submit it as an answer
-  useEffect(() => {
-    if (voice.transcript && (echo.flow === "FIELD_LOOP" || echo.flow === "CONFIRMING")) {
-      handleUserInput(voice.transcript)
-    }
-  }, [voice.transcript]) // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleFormSelect = useCallback(
     async (form: FormInfo) => {
       const fields = await echo.selectForm(form)
@@ -56,7 +49,7 @@ function AppContent() {
         }
       }
     },
-    [echo, voice] // eslint-disable-line react-hooks/exhaustive-deps
+    [echo, voice]
   )
 
   const handleUserInput = useCallback(
@@ -90,8 +83,15 @@ function AppContent() {
         voice.speak(question)
       }
     },
-    [echo, voice] // eslint-disable-line react-hooks/exhaustive-deps
+    [echo, voice]
   )
+
+  // When voice transcript changes, submit it as an answer
+  useEffect(() => {
+    if (voice.transcript && (echo.flow === "FIELD_LOOP" || echo.flow === "CONFIRMING")) {
+      handleUserInput(voice.transcript)
+    }
+  }, [voice.transcript, handleUserInput]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleVoice = useCallback(() => {
     if (voice.isListening) {
