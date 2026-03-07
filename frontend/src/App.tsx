@@ -305,13 +305,16 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (!session) {
-    return <Auth />
-  }
-
+  // Step 1: Always show landing page first
   if (showLanding) {
     return <LandingPage onEnter={() => setShowLanding(false)} />
   }
 
+  // Step 2: After landing, require login
+  if (!session) {
+    return <Auth />
+  }
+
+  // Step 3: Logged in → main app
   return <AppContent />
 }
