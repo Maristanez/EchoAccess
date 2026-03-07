@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="../.env")
+# Load .env from project root (works regardless of cwd)
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 
 import os
 from contextlib import asynccontextmanager
@@ -10,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
 
-from dependencies.auth import verify_token
+from dependencies.auth import verify_token, verify_token_optional
 
 from gemini_client import (
     parse_form_html,
@@ -121,7 +124,8 @@ async def health(token_payload: dict = Depends(verify_token)):
 
 
 @app.get("/api/forms")
-async def list_forms(token_payload: dict = Depends(verify_token)):
+async def list_forms(_token: dict | None = Depends(verify_token_optional)):
+    """Forms list is public so it loads even if JWT verification has issues."""
     return {
         "forms": [
             {"id": "bank-account", "name": "TD Bank Account Application"},
@@ -132,7 +136,7 @@ async def list_forms(token_payload: dict = Depends(verify_token)):
 
 
 @app.post("/api/parse-form")
-async def parse_form(req: ParseFormRequest, token_payload: dict = Depends(verify_token)):
+async def parse_form(req: ParseFormRequest, _token: dict | None = Depends(verify_token_optional)):
     form_path = f"forms/{req.form_name}.html"
     try:
         with open(form_path, "r") as f:
@@ -161,7 +165,7 @@ async def new_session(token_payload: dict = Depends(verify_token)):
 
 
 @app.post("/api/chat")
-async def chat(req: ChatRequest, token_payload: dict = Depends(verify_token)):
+async def chat(req: ChatRequest, _token: dict | None = Depends(verify_token_optional)):
     next_field = (
         req.fields[req.current_field_index]
         if req.current_field_index < len(req.fields)

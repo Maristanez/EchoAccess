@@ -169,6 +169,9 @@ export function useEchoAccess() {
           body: JSON.stringify({ form_name: form.id }),
         })
         const data = await res.json()
+        if (!res.ok || !Array.isArray(data.fields)) {
+          throw new Error(data.detail || "Failed to parse form")
+        }
         const parsedFields = data.fields as FormField[]
         parsedFormsCache.current[form.id] = parsedFields
         setFields(parsedFields)
@@ -212,10 +215,13 @@ export function useEchoAccess() {
             }),
           })
           const data = await res.json()
+          if (!res.ok || typeof data.summary !== "string") {
+            throw new Error(data.detail || "Failed to generate summary")
+          }
           setSummary(data.summary)
           addMessage("assistant", data.summary)
           setIsLoading(false)
-          return data.summary as string
+          return data.summary
         } catch {
           const fallback =
             "You've completed all the fields! Would you like me to submit?"
@@ -248,7 +254,10 @@ export function useEchoAccess() {
           }),
         })
         const data = await res.json()
-        const question = data.question as string
+        if (!res.ok || typeof data.question !== "string") {
+          throw new Error(data.detail || "Failed to generate question")
+        }
+        const question = data.question
         addMessage("assistant", question)
         setIsLoading(false)
         return question

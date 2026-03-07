@@ -25,6 +25,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { RotateCcw, CheckCircle2, Pencil, LogOut } from "lucide-react"
 import type { FormInfo } from "@/types"
 import { LandingPage } from "@/components/LandingPage"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 
 function matchFormByVoice(transcript: string, forms: FormInfo[]): FormInfo | null {
   const lower = transcript.toLowerCase()
@@ -383,5 +384,9 @@ export default function App() {
   }
 
   // Step 3: Logged in → main app
-  return <AppContent />
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
+  )
 }
