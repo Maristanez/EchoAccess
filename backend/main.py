@@ -2,10 +2,13 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import httpx
 
 from dependencies.auth import verify_token
 
@@ -103,6 +106,10 @@ class SubmitFormRequest(BaseModel):
     thread_id: str | None = None
     form_name: str
     answers: list
+
+
+class TTSRequest(BaseModel):
+    text: str
 
 
 # ── Routes ──
@@ -243,3 +250,31 @@ async def submit_form(req: SubmitFormRequest, token_payload: dict = Depends(veri
         except Exception:
             pass
     return {"summary": summary}
+
+
+@app.post("/api/tts")
+async def text_to_speech(req: TTSRequest):
+    api_key = os.getenv("ELEVENLABS_API_KEY")
+    voice_id = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="ELEVENLABS_API_KEY not configured")
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            headers={
+                "xi-api-key": api_key,
+                "Content-Type": "application/json",
+            },
+            json={
+                "text": req.text,
+                "model_id": "eleven_flash_v2_5",
+                "voice_settings": {
+                    "stability": 0.5,
+                    "similarity_boost": 0.75,
+                },
+            },
+        )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="ElevenLabs API error")
+    return Response(content=resp.content, media_type="audio/mpeg")

@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 MODEL = "gemini-2.5-flash"
+NO_THINK = types.GenerateContentConfig(
+    thinking_config=types.ThinkingConfig(thinking_budget=0)
+)
 
 
 def _strip_fences(text: str) -> str:
@@ -24,7 +27,7 @@ async def _call_gemini(prompt: str, max_retries: int = 5) -> str:
     """Call Gemini with automatic retry on rate-limit (429) errors."""
     for attempt in range(max_retries):
         try:
-            response = client.models.generate_content(model=MODEL, contents=prompt)
+            response = await client.aio.models.generate_content(model=MODEL, contents=prompt, config=NO_THINK)
             return response.text
         except Exception as e:
             error_str = str(e)

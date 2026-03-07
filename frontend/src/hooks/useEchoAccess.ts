@@ -67,6 +67,7 @@ export function useEchoAccess() {
   const [isLoading, setIsLoading] = useState(false)
   const [summary, setSummary] = useState("")
   const parsedFormsCache = useRef<Record<string, FormField[]>>({})
+  const firstQuestionCache = useRef<Record<string, string>>({})
 
   const addMessage = useCallback(
     (role: "user" | "assistant", content: string) => {
@@ -87,7 +88,7 @@ export function useEchoAccess() {
       console.log("[loadForms] forms received:", list)
       setForms(list)
 
-      // Pre-parse all forms in background
+      // Pre-parse all forms and pre-generate first questions in background
       for (const form of list) {
         fetchWithAuth(`${API_BASE}/parse-form`, {
           method: "POST",
@@ -99,6 +100,27 @@ export function useEchoAccess() {
             if (d.fields) {
               parsedFormsCache.current[form.id] = d.fields
               console.log(`[preparse] cached ${form.id}: ${d.fields.length} fields`)
+
+              // Pre-generate first question
+              fetchWithAuth(`${API_BASE}/chat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  thread_id: null,
+                  form_name: form.id,
+                  fields: d.fields,
+                  current_field_index: 0,
+                  answered: [],
+                }),
+              })
+                .then((r) => r.json())
+                .then((q) => {
+                  if (q.question) {
+                    firstQuestionCache.current[form.id] = q.question
+                    console.log(`[pregen] cached first question for ${form.id}`)
+                  }
+                })
+                .catch(() => {})
             }
           })
           .catch(() => {})
@@ -203,6 +225,15 @@ export function useEchoAccess() {
         }
       }
 
+      // Use cached first question if available
+      const formId = selectedFormRef.current?.id ?? ""
+      if (currentIdx === 0 && answersRef.current.length === 0 && firstQuestionCache.current[formId]) {
+        const question = firstQuestionCache.current[formId]
+        delete firstQuestionCache.current[formId]
+        addMessage("assistant", question)
+        return question
+      }
+
       setIsLoading(true)
       try {
         const res = await fetchWithAuth(`${API_BASE}/chat`, {
@@ -210,7 +241,7 @@ export function useEchoAccess() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             thread_id: threadId,
-            form_name: selectedFormRef.current?.id ?? "",
+            form_name: formId,
             fields: currentFields,
             current_field_index: currentIdx,
             answered: answersRef.current,
