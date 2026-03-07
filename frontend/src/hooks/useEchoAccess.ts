@@ -66,6 +66,7 @@ export function useEchoAccess() {
   const [threadId, setThreadId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [summary, setSummary] = useState("")
+  const parsedFormsCache = useRef<Record<string, FormField[]>>({})
 
   const addMessage = useCallback(
     (role: "user" | "assistant", content: string) => {
@@ -85,6 +86,23 @@ export function useEchoAccess() {
       const list = Array.isArray(data.forms) ? data.forms : []
       console.log("[loadForms] forms received:", list)
       setForms(list)
+
+      // Pre-parse all forms in background
+      for (const form of list) {
+        fetchWithAuth(`${API_BASE}/parse-form`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ form_name: form.id }),
+        })
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.fields) {
+              parsedFormsCache.current[form.id] = d.fields
+              console.log(`[preparse] cached ${form.id}: ${d.fields.length} fields`)
+            }
+          })
+          .catch(() => {})
+      }
     } catch (err) {
       console.error("[loadForms] fetch failed:", err)
     }
@@ -110,6 +128,16 @@ export function useEchoAccess() {
       setCurrentFieldIndex(0)
       setSummary("")
 
+      // Use cached fields if available
+      const cached = parsedFormsCache.current[form.id]
+      if (cached) {
+        addMessage("assistant", `Let's fill out the ${form.name}. I'll ask you one at a time — just speak or type your answers.`)
+        setFields(cached)
+        setFlow("FIELD_LOOP")
+        setIsLoading(false)
+        return cached
+      }
+
       addMessage("assistant", `Great, let's fill out the ${form.name}. Give me a moment to read the form...`)
 
       try {
@@ -120,6 +148,7 @@ export function useEchoAccess() {
         })
         const data = await res.json()
         const parsedFields = data.fields as FormField[]
+        parsedFormsCache.current[form.id] = parsedFields
         setFields(parsedFields)
         setFlow("FIELD_LOOP")
         setIsLoading(false)
