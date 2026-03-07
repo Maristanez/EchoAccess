@@ -142,7 +142,7 @@ function NavSection({ onEnter }: { onEnter: () => void }) {
           onClick={onEnter}
           className="px-4 py-2 rounded-full bg-brand-primary text-white dark:text-black text-sm font-semibold hover:bg-brand-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-page"
         >
-          Try Demo
+          Get Started
         </button>
       </div>
     </motion.nav>
@@ -207,7 +207,7 @@ function HeroSection({ onEnter }: { onEnter: () => void }) {
               onClick={onEnter}
               className="px-7 py-3.5 rounded-full bg-brand-primary text-white dark:text-black font-bold text-base hover:bg-brand-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-page"
             >
-              Launch Demo
+              Get Started
             </button>
             <a
               href="#how-it-works"
@@ -335,7 +335,7 @@ const STEPS = [
   {
     num: "01",
     title: "Pick a form",
-    desc: "Choose from dozens of pre-loaded government, medical, and institutional forms.",
+    desc: "Choose a form from dozens of government, medical, and institutional options.",
   },
   {
     num: "02",
@@ -480,12 +480,12 @@ const FEATURES = [
   {
     icon: Layers,
     title: "Remembers You",
-    desc: "Session memory retains your answers as you go, so you can correct mistakes or backtrack without starting over.",
+    desc: "Backboard memory retains your answers across sessions. Returning users get pre-filled suggestions from past forms.",
   },
   {
     icon: Lock,
     title: "Privacy by Design",
-    desc: "No data stored server-side. All form answers live in your browser session and are discarded when you're done.",
+    desc: "Your answers are stored securely. Sign in to have EchoAccess remember you across sessions.",
   },
 ]
 
@@ -568,14 +568,13 @@ function CtaSection({ onEnter }: { onEnter: () => void }) {
           <span className="text-brand-primary">the barrier?</span>
         </h2>
         <p className="text-text-primary/50 mb-10 max-w-md mx-auto leading-relaxed">
-          Try EchoAccess right now — no sign-up, no download, no cost.
-          Just your voice and the form.
+          Sign up free — no download, no cost. Just your voice and the form.
         </p>
         <button
           onClick={onEnter}
           className="px-8 py-4 rounded-full bg-text-primary text-surface-page font-bold text-base hover:bg-text-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-ring-offset-card"
         >
-          Launch EchoAccess
+          Get Started
         </button>
       </motion.div>
     </section>
