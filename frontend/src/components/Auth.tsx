@@ -1,8 +1,11 @@
 import { supabase } from '@/lib/supabase'
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
+import { useTheme } from '@/hooks/ThemeContext'
 
 export function Auth() {
+    const { theme } = useTheme()
+
     return (
         <div className="flex h-screen w-screen items-center justify-center bg-background">
             <div className="w-full max-w-md p-8 bg-card rounded-xl border shadow-sm">
@@ -15,6 +18,7 @@ export function Auth() {
                 </div>
                 <SupabaseAuth
                     supabaseClient={supabase}
+                    theme={theme === "dark" ? "dark" : "default"}
                     appearance={{
                         theme: ThemeSupa,
                         variables: {
