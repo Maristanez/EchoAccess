@@ -4,3 +4,4 @@ google-genai>=1.0.0
 backboard-sdk>=1.0.0
 python-dotenv>=1.0.0
 python-multipart>=0.0.6
+PyJWT>=2.8.0

@@ -2,9 +2,11 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from dependencies.auth import verify_token
 
 from gemini_client import (
     parse_form_html,
@@ -104,12 +106,12 @@ class SubmitFormRequest(BaseModel):
 
 
 @app.get("/api/health")
-async def health():
+async def health(token_payload: dict = Depends(verify_token)):
     return {"status": "ok", "backboard": ASSISTANT_ID is not None}
 
 
 @app.get("/api/forms")
-async def list_forms():
+async def list_forms(token_payload: dict = Depends(verify_token)):
     return {
         "forms": [
             {"id": "bank-account", "name": "TD Bank Account Application"},
@@ -120,7 +122,7 @@ async def list_forms():
 
 
 @app.post("/api/parse-form")
-async def parse_form(req: ParseFormRequest):
+async def parse_form(req: ParseFormRequest, token_payload: dict = Depends(verify_token)):
     form_path = f"forms/{req.form_name}.html"
     try:
         with open(form_path, "r") as f:
@@ -134,7 +136,7 @@ async def parse_form(req: ParseFormRequest):
 
 
 @app.post("/api/new-session")
-async def new_session():
+async def new_session(token_payload: dict = Depends(verify_token)):
     if ASSISTANT_ID is None:
         return {"thread_id": None}
     thread_id = await create_session_thread(ASSISTANT_ID)
@@ -142,7 +144,7 @@ async def new_session():
 
 
 @app.post("/api/chat")
-async def chat(req: ChatRequest):
+async def chat(req: ChatRequest, token_payload: dict = Depends(verify_token)):
     next_field = (
         req.fields[req.current_field_index]
         if req.current_field_index < len(req.fields)
@@ -177,7 +179,7 @@ async def chat(req: ChatRequest):
 
 
 @app.post("/api/save-answer")
-async def save_answer(req: SaveAnswerRequest):
+async def save_answer(req: SaveAnswerRequest, token_payload: dict = Depends(verify_token)):
     if req.thread_id:
         try:
             await store_context(
@@ -192,7 +194,7 @@ async def save_answer(req: SaveAnswerRequest):
 
 
 @app.get("/api/user-profile")
-async def user_profile(thread_id: str | None = None):
+async def user_profile(thread_id: str | None = None, token_payload: dict = Depends(verify_token)):
     if not thread_id:
         return {"profile": {}}
     try:
@@ -206,7 +208,7 @@ async def user_profile(thread_id: str | None = None):
 
 
 @app.post("/api/submit-form")
-async def submit_form(req: SubmitFormRequest):
+async def submit_form(req: SubmitFormRequest, token_payload: dict = Depends(verify_token)):
     summary = await generate_summary(req.form_name, req.answers)
     if req.thread_id:
         try:

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import type { FormField, ChatMessage, FlowState, FormInfo, Answer } from "@/types"
+import { supabase } from "@/lib/supabase"
 
 const API_BASE = "/api"
 
@@ -8,6 +9,21 @@ const PROFILE_KEYWORDS = [
   "email", "address", "street", "phone",
   "date of birth", "dob", "city", "postal code", "province",
 ]
+
+async function fetchWithAuth(url: string, options: RequestInit = {}) {
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token
+
+  const headers = new Headers(options.headers)
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`)
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  })
+}
 
 function isProfileField(label: string): boolean {
   const lower = label.toLowerCase()
@@ -39,14 +55,14 @@ export function useEchoAccess() {
   )
 
   const loadForms = useCallback(async () => {
-    const res = await fetch(`${API_BASE}/forms`)
+    const res = await fetchWithAuth(`${API_BASE}/forms`)
     const data = await res.json()
     setForms(data.forms)
   }, [])
 
   const initSession = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/new-session`, { method: "POST" })
+      const res = await fetchWithAuth(`${API_BASE}/new-session`, { method: "POST" })
       const data = await res.json()
       setThreadId(data.thread_id)
     } catch {
@@ -67,7 +83,7 @@ export function useEchoAccess() {
       addMessage("assistant", `Great, let's fill out the ${form.name}. Give me a moment to read the form...`)
 
       try {
-        const res = await fetch(`${API_BASE}/parse-form`, {
+        const res = await fetchWithAuth(`${API_BASE}/parse-form`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ form_name: form.id }),
@@ -105,7 +121,7 @@ export function useEchoAccess() {
         setIsLoading(true)
 
         try {
-          const res = await fetch(`${API_BASE}/submit-form`, {
+          const res = await fetchWithAuth(`${API_BASE}/submit-form`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -130,7 +146,7 @@ export function useEchoAccess() {
 
       setIsLoading(true)
       try {
-        const res = await fetch(`${API_BASE}/chat`, {
+        const res = await fetchWithAuth(`${API_BASE}/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -175,7 +191,7 @@ export function useEchoAccess() {
       setCurrentFieldIndex(nextIdx)
 
       // Save answer to Backboard
-      fetch(`${API_BASE}/save-answer`, {
+      fetchWithAuth(`${API_BASE}/save-answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -184,7 +200,7 @@ export function useEchoAccess() {
           value,
           is_profile_field: isProfileField(field.label),
         }),
-      }).catch(() => {})
+      }).catch(() => { })
 
       return nextIdx
     },

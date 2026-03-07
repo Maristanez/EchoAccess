@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import type { Session } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase"
+import { Auth } from "@/components/Auth"
 import { useEchoAccess } from "@/hooks/useEchoAccess"
 import { useVoice } from "@/hooks/useVoice"
 import { ChatPanel } from "@/components/ChatPanel"
@@ -19,7 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RotateCcw, CheckCircle2, Pencil } from "lucide-react"
+import { RotateCcw, CheckCircle2, Pencil, LogOut } from "lucide-react"
 import type { FormInfo } from "@/types"
 import { LandingPage } from "@/components/LandingPage"
 
@@ -143,6 +146,10 @@ function AppContent() {
             Start Over
           </Button>
         )}
+        <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
+          <LogOut className="h-4 w-4 mr-1" />
+          Sign Out
+        </Button>
       </header>
 
       {/* Main Content */}
@@ -202,7 +209,7 @@ function AppContent() {
       {/* Confirmation Dialog */}
       <Dialog
         open={echo.flow === "CONFIRMING" && !!echo.summary}
-        onOpenChange={() => {}}
+        onOpenChange={() => { }}
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -281,7 +288,26 @@ function AppContent() {
 }
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null)
   const [showLanding, setShowLanding] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (!session) {
+    return <Auth />
+  }
 
   if (showLanding) {
     return <LandingPage onEnter={() => setShowLanding(false)} />
