@@ -16,7 +16,6 @@ from gemini_client import (
     parse_form_html,
     generate_question,
     generate_summary,
-    explain_errors,
 )
 from backboard_client import (
     create_echoaccess_assistant,
@@ -113,6 +112,12 @@ class TTSRequest(BaseModel):
 
 
 # ── Routes ──
+
+
+@app.get("/health")
+async def health_public():
+    """Unauthenticated health check for load balancers and readiness probes."""
+    return {"status": "ok", "backboard": ASSISTANT_ID is not None}
 
 
 @app.get("/api/health")

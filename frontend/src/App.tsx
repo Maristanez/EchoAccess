@@ -22,7 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RotateCcw, CheckCircle2, Pencil, LogOut } from "lucide-react"
+import { RotateCcw, CheckCircle2, Pencil, LogOut, FileText } from "lucide-react"
 import type { FormInfo } from "@/types"
 import { LandingPage } from "@/components/LandingPage"
 
@@ -260,13 +260,28 @@ function AppContent() {
 
       {/* Success state */}
       {echo.flow === "SUBMITTED" && (
-        <Alert className="m-4 border-brand-primary/30 bg-brand-primary/10">
-          <CheckCircle2 className="h-4 w-4 text-brand-primary" />
-          <AlertDescription className="text-brand-primary">
-            Form submitted successfully! You can select another form or start
-            over.
-          </AlertDescription>
-        </Alert>
+        <div className="m-4 space-y-3">
+          <Alert className="border-brand-primary/30 bg-brand-primary/10">
+            <CheckCircle2 className="h-4 w-4 text-brand-primary" />
+            <AlertDescription className="text-brand-primary">
+              Form submitted successfully! This was a demo — in production, your
+              answers would be sent to the form provider.
+            </AlertDescription>
+          </Alert>
+          <div className="flex items-center gap-3 justify-center">
+            <Button
+              onClick={echo.reset}
+              className="bg-brand-primary text-white dark:text-black hover:bg-brand-primary/90"
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Fill Another Form
+            </Button>
+            <Button variant="outline" onClick={echo.reset}>
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Start Over
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Confetti */}
