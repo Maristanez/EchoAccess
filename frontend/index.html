@@ -1,13 +1,22 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
+    <script>
+      (function(){
+        var s = localStorage.getItem('echoAccess-theme');
+        if (s === 'dark' || (!s && !window.matchMedia('(prefers-color-scheme: light)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>EchoAccess</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>EchoAccess — Voice-First Form Accessibility</title>
+    <meta name="description" content="EchoAccess turns complex web forms into guided voice conversations for blind and low-vision users." />
   </head>
   <body>
     <div id="root"></div>
