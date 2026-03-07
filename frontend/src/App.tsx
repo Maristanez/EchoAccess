@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useEchoAccess } from "@/hooks/useEchoAccess"
 import { useVoice } from "@/hooks/useVoice"
 import { ChatPanel } from "@/components/ChatPanel"
@@ -21,8 +21,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { RotateCcw, CheckCircle2, Pencil } from "lucide-react"
 import type { FormInfo } from "@/types"
+import { LandingPage } from "@/components/LandingPage"
 
-export default function App() {
+function AppContent() {
   const echo = useEchoAccess()
   const voice = useVoice()
   const hasInitialized = useRef(false)
@@ -277,4 +278,14 @@ export default function App() {
       </footer>
     </div>
   )
+}
+
+export default function App() {
+  const [showLanding, setShowLanding] = useState(true)
+
+  if (showLanding) {
+    return <LandingPage onEnter={() => setShowLanding(false)} />
+  }
+
+  return <AppContent />
 }
