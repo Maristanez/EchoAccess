@@ -78,6 +78,42 @@ Return ONLY JSON: {{ "question": "..." }}"""
     return json.loads(_strip_fences(text))
 
 
+async def extract_answer(
+    field: dict, question: str, user_response: str
+) -> dict:
+    """Interpret the user's conversational response and extract the actual value for the field."""
+    prompt = f"""You are an accessibility assistant helping a blind user fill out a form.
+
+The assistant just asked this question about a form field:
+Question: "{question}"
+Field info: {json.dumps(field)}
+
+The user responded: "{user_response}"
+
+Your job: extract the ACTUAL data value that should be saved for this form field.
+
+Rules:
+- If the user confirms a suggestion (e.g. "yes", "yeah", "that's correct", "yep", "right"), extract the value that was suggested in the question and return THAT value, not "yes".
+- If the user provides a direct answer (e.g. "John", "john@email.com"), return that answer as-is.
+- If the user corrects a suggestion (e.g. "no, it's Smith" or "actually it's different, my name is Smith"), extract the corrected value.
+- If the user says something like "no" without providing an alternative, return exactly "NO_VALUE" so the system can re-ask.
+- For select/radio fields with options, match the user's response to the closest option.
+- Return ONLY the extracted data value as plain text. No quotes, no explanation, no JSON.
+
+Examples:
+- Question "Is your last name Bryan?" + Response "yes" → Bryan
+- Question "What is your first name?" + Response "John" → John
+- Question "Is your email john@test.com?" + Response "that's right" → john@test.com
+- Question "Is your last name Bryan?" + Response "no, it's Smith" → Smith
+- Question "Is your last name Bryan?" + Response "no" → NO_VALUE
+
+Return ONLY the extracted value:"""
+
+    text = await _call_gemini(prompt)
+    value = text.strip().strip('"').strip("'")
+    return {"value": value, "needs_reask": value == "NO_VALUE"}
+
+
 async def generate_summary(form_name: str, answers: list) -> str:
     """Generate a plain-English summary of completed form."""
     prompt = f"""The user has finished the {form_name} form. Their answers: {json.dumps(answers)}

@@ -115,7 +115,15 @@ function AppContent() {
       if (echo.flow !== "FIELD_LOOP") return
 
       const nextIdx = await echo.submitAnswer(text)
-      if (nextIdx === null) return
+      if (nextIdx === null) {
+        // User said "no" without providing an alternative — re-ask
+        const reask = `Okay, let me ask again. What is your ${echo.fields[echo.currentFieldIndex]?.label}?`
+        echo.addMessage("assistant", reask)
+        voice.speak(reask).then(() => {
+          if (voice.supported) voice.startListening()
+        })
+        return
+      }
 
       const question = await echo.askNextQuestion(undefined, nextIdx)
       if (question) {
