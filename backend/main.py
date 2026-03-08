@@ -16,6 +16,7 @@ from gemini_client import (
     parse_form_html,
     generate_question,
     generate_summary,
+    extract_answer,
 )
 from backboard_client import (
     create_echoaccess_assistant,
@@ -113,6 +114,12 @@ class SubmitFormRequest(BaseModel):
     thread_id: str | None = None
     form_name: str
     answers: list
+
+
+class ExtractAnswerRequest(BaseModel):
+    field: dict
+    question: str
+    user_response: str
 
 
 class TTSRequest(BaseModel):
@@ -299,6 +306,21 @@ async def submit_form(req: SubmitFormRequest, token_payload: dict = Depends(veri
         except Exception as e:
             print(f"[submit-form] store_context failed: {e}")
     return {"summary": summary}
+
+
+@app.post("/api/extract-answer")
+async def extract_answer_route(req: ExtractAnswerRequest, token_payload: dict = Depends(verify_token)):
+    try:
+        result = await extract_answer(
+            field=req.field,
+            question=req.question,
+            user_response=req.user_response,
+        )
+        return result
+    except Exception as e:
+        print(f"[extract-answer] Gemini error: {e}")
+        # Fallback: return raw response so form filling doesn't break
+        return {"value": req.user_response, "needs_reask": False}
 
 
 @app.post("/api/tts")

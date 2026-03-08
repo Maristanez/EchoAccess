@@ -66,6 +66,7 @@ export function useEchoAccess() {
   const [threadId, setThreadId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [summary, setSummary] = useState("")
+  const lastQuestionRef = useRef<string>("")
   const parsedFormsCache = useRef<Record<string, FormField[]>>({})
   const firstQuestionCache = useRef<Record<string, string>>({})
 
@@ -230,6 +231,7 @@ export function useEchoAccess() {
       if (currentIdx === 0 && answersRef.current.length === 0 && firstQuestionCache.current[formId]) {
         const question = firstQuestionCache.current[formId]
         delete firstQuestionCache.current[formId]
+        lastQuestionRef.current = question
         addMessage("assistant", question)
         return question
       }
@@ -249,12 +251,14 @@ export function useEchoAccess() {
         })
         const data = await res.json()
         const question = data.question as string
+        lastQuestionRef.current = question
         addMessage("assistant", question)
         setIsLoading(false)
         return question
       } catch {
         const field = currentFields[currentIdx]
         const fallback = `What is your ${field.label}?`
+        lastQuestionRef.current = fallback
         addMessage("assistant", fallback)
         setIsLoading(false)
         return fallback
@@ -270,10 +274,34 @@ export function useEchoAccess() {
       const field = fields[currentFieldIndex]
       addMessage("user", value)
 
+      // Extract the actual value using LLM (handles "yes" confirmations, corrections, etc.)
+      let extractedValue = value
+      try {
+        const res = await fetchWithAuth(`${API_BASE}/extract-answer`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            field,
+            question: lastQuestionRef.current,
+            user_response: value,
+          }),
+        })
+        const data = await res.json()
+        if (data.needs_reask) {
+          // User said "no" without providing an alternative — caller handles re-ask
+          lastQuestionRef.current = `What is your ${field.label}?`
+          return null
+        }
+        extractedValue = data.value
+      } catch {
+        // Fallback: use raw value if extraction fails
+        extractedValue = value
+      }
+
       const newAnswer: Answer = {
         field_id: field.id,
         label: field.label,
-        value,
+        value: extractedValue,
       }
       const newAnswers = [...answersRef.current, newAnswer]
       setAnswers(newAnswers)
@@ -287,7 +315,7 @@ export function useEchoAccess() {
         body: JSON.stringify({
           thread_id: threadId,
           field_id: field.id,
-          value,
+          value: extractedValue,
           is_profile_field: isProfileField(field.label),
         }),
       }).catch(() => { })
