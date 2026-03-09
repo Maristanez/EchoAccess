@@ -22,7 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RotateCcw, CheckCircle2, Pencil, LogOut, FileText } from "lucide-react"
+import { RotateCcw, CheckCircle2, Pencil, LogOut, FileText, Sun, Moon } from "lucide-react"
 import type { FormInfo } from "@/types"
 import { LandingPage } from "@/components/LandingPage"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
@@ -51,6 +51,23 @@ function AppContent() {
   const hasInitialized = useRef(false)
   const voiceFormSelectionRef = useRef(false)
   const hasGreetedRef = useRef(false)
+
+  // ── Theme toggle ──
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const stored = localStorage.getItem("echoaccess-theme")
+    if (stored) return stored === "dark"
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+  })
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (isDarkMode) {
+      root.classList.add("dark")
+    } else {
+      root.classList.remove("dark")
+    }
+    localStorage.setItem("echoaccess-theme", isDarkMode ? "dark" : "light")
+  }, [isDarkMode])
 
   // Load forms and init session on mount
   useEffect(() => {
@@ -217,6 +234,15 @@ function AppContent() {
             Start Over
           </Button>
         )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          className="text-text-primary/60 hover:text-text-primary hover:bg-surface-card rounded-full h-8 w-8"
+        >
+          {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
         <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-text-primary/60 hover:text-text-primary hover:bg-surface-card rounded-full">
           <LogOut className="h-4 w-4 mr-1" />
           Sign Out

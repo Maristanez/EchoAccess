@@ -71,8 +71,8 @@ Next field: {json.dumps(next_field)}
 Already answered: {json.dumps(answered)}
 Profile: {json.dumps(profile)}
 
-Ask one short friendly question for this field (1-2 sentences max). If it has options, list them. If profile has a match, suggest it.
-Return ONLY JSON: {{ "question": "..." }}"""
+Ask one short friendly question for this field (1-2 sentences max). If it has options, list them. If the profile has a match, suggest it by appending the suggestion directly into your conversational question (e.g. "What is your first name? I remember it is Alex, should I use that?").
+Return ONLY JSON: {{ "question": "<your full conversational text here including the suggestion>" }}"""
 
     text = await _call_gemini(prompt)
     return json.loads(_strip_fences(text))
